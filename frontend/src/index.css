@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Green-and-white academia.
+ *
+ * The palette is paper first: a warm off-white canvas rather than pure white,
+ * so long reading sessions do not glare, with white reserved for the cards
+ * that sit on top of it. That contrast is what gives the layout depth without
+ * needing shadows.
+ *
+ * Three status colours, deliberately three different hues:
+ *   accent (forest green) = done
+ *   warning (muted gold)  = in progress
+ *   ink-muted (grey)      = not started
+ * Two greens for "done" and "in progress" would be near-indistinguishable at
+ * badge size, which is exactly where the distinction matters.
+ */
+:root {
+  --color-canvas: 248 246 240;
+  --color-surface: 255 255 255;
+  --color-line: 224 220 208;
+  --color-ink: 28 38 32;
+  --color-ink-muted: 100 106 98;
+  --color-accent: 45 106 79;
+  --color-accent-hover: 34 84 61;
+  --color-accent-soft: 226 238 231;
+  --color-success: 45 106 79;
+  --color-warning: 146 111 33;
+}
+
+.dark {
+  --color-canvas: 17 22 19;
+  --color-surface: 24 31 26;
+  --color-line: 42 52 45;
+  --color-ink: 232 235 230;
+  --color-ink-muted: 152 162 152;
+  --color-accent: 122 184 148;
+  --color-accent-hover: 150 205 172;
+  --color-accent-soft: 32 46 38;
+  --color-success: 122 184 148;
+  --color-warning: 214 178 92;
+}
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-serif;
+}
+
+/*
+ * Respect reduced motion globally rather than per component. The completion
+ * animation is the one thing here that moves purely for effect, and that is
+ * precisely the kind of thing this preference exists to switch off.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes ep-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ep-rise {
+  animation: ep-rise 260ms ease-out both;
+}

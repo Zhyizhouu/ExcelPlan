@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# The backend's own completion-date store. Machine-local state, not source.
+progress-log.json
+backend/excelplan-api.exe
+
+# Answer workbooks live in the vault, not here.
+*.xlsx

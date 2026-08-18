@@ -1,0 +1,680 @@
+{
+  "W1D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "No",
+      "Course ID",
+      "Class",
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Work from the first 20 rows. Navigate with Ctrl+Arrows, select with Ctrl+Shift+Arrows.",
+    "task": "Retype these five columns for the first 20 sessions without touching the mouse.",
+    "result": {
+      "columns": [
+        "No",
+        "Course ID",
+        "Class",
+        "Ast",
+        "Workload"
+      ],
+      "rows": [
+        {
+          "No": 1,
+          "Course ID": "COMP6047001",
+          "Class": "BA1A",
+          "Ast": "AB",
+          "Workload": 2.5
+        },
+        {
+          "No": 2,
+          "Course ID": "COMP6048002",
+          "Class": "BA2A",
+          "Ast": "BC",
+          "Workload": 2.0
+        },
+        {
+          "No": 3,
+          "Course ID": "COMP6049003",
+          "Class": "BA3A",
+          "Ast": "CD",
+          "Workload": 1.0
+        },
+        {
+          "No": 4,
+          "Course ID": "COMP6050004",
+          "Class": "BA4A",
+          "Ast": "DE",
+          "Workload": 2.0
+        },
+        {
+          "No": 5,
+          "Course ID": "COMP6051005",
+          "Class": "BA1A",
+          "Ast": "EF",
+          "Workload": 2.0
+        },
+        {
+          "No": 6,
+          "Course ID": "COMP6052006",
+          "Class": "BA2A",
+          "Ast": "FG",
+          "Workload": 1.0
+        },
+        {
+          "No": 7,
+          "Course ID": "COMP6053007",
+          "Class": "BA3A",
+          "Ast": "GH",
+          "Workload": 2.0
+        },
+        {
+          "No": 8,
+          "Course ID": "COMP6054008",
+          "Class": "BA4A",
+          "Ast": "HI",
+          "Workload": 2.5
+        },
+        {
+          "No": 9,
+          "Course ID": "COMP6055009",
+          "Class": "BA1A",
+          "Ast": "IJ",
+          "Workload": 1.0
+        },
+        {
+          "No": 10,
+          "Course ID": "COMP6056010",
+          "Class": "BA2A",
+          "Ast": "JK",
+          "Workload": 2.0
+        },
+        {
+          "No": 11,
+          "Course ID": "COMP6047001",
+          "Class": "BA3A",
+          "Ast": "KL",
+          "Workload": 2.0
+        },
+        {
+          "No": 12,
+          "Course ID": "COMP6048002",
+          "Class": "BA4A",
+          "Ast": "LM",
+          "Workload": 1.0
+        },
+        {
+          "No": 13,
+          "Course ID": "COMP6049003",
+          "Class": "BA1A",
+          "Ast": "MN",
+          "Workload": 2.0
+        },
+        {
+          "No": 14,
+          "Course ID": "COMP6050004",
+          "Class": "BA2A",
+          "Ast": "NO",
+          "Workload": 2.0
+        },
+        {
+          "No": 15,
+          "Course ID": "COMP6051005",
+          "Class": "BA3A",
+          "Ast": "OP",
+          "Workload": 1.5
+        },
+        {
+          "No": 16,
+          "Course ID": "COMP6052006",
+          "Class": "BA4A",
+          "Ast": "PQ",
+          "Workload": 2.0
+        },
+        {
+          "No": 17,
+          "Course ID": "COMP6053007",
+          "Class": "BA1A",
+          "Ast": "QR",
+          "Workload": 2.0
+        },
+        {
+          "No": 18,
+          "Course ID": "COMP6054008",
+          "Class": "BA2A",
+          "Ast": "RS",
+          "Workload": 1.0
+        },
+        {
+          "No": 19,
+          "Course ID": "COMP6055009",
+          "Class": "BA3A",
+          "Ast": "ST",
+          "Workload": 2.0
+        },
+        {
+          "No": 20,
+          "Course ID": "COMP6056010",
+          "Class": "BA4A",
+          "Ast": "TU",
+          "Workload": 2.0
+        }
+      ]
+    },
+    "resultNote": "Identical to the source \u2014 the exercise is the keyboard, not the answer.",
+    "formula": "Ctrl+\u2192  Ctrl+Shift+\u2193  F2  Ctrl+;  F4"
+  },
+  "W1D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Assistants down the side, multipliers across the top.",
+    "task": "One formula in the top-left cell, dragged across and down, fills the whole block.",
+    "result": {
+      "columns": [
+        "Ast",
+        "1.0",
+        "1.25",
+        "1.5",
+        "2.0"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "1.0": 5.0,
+          "1.25": 6.25,
+          "1.5": 7.5,
+          "2.0": 10.0
+        },
+        {
+          "Ast": "BC",
+          "1.0": 4.0,
+          "1.25": 5.0,
+          "1.5": 6.0,
+          "2.0": 8.0
+        },
+        {
+          "Ast": "CD",
+          "1.0": 2.0,
+          "1.25": 2.5,
+          "1.5": 3.0,
+          "2.0": 4.0
+        },
+        {
+          "Ast": "DE",
+          "1.0": 4.0,
+          "1.25": 5.0,
+          "1.5": 6.0,
+          "2.0": 8.0
+        },
+        {
+          "Ast": "EF",
+          "1.0": 4.0,
+          "1.25": 5.0,
+          "1.5": 6.0,
+          "2.0": 8.0
+        },
+        {
+          "Ast": "FG",
+          "1.0": 2.0,
+          "1.25": 2.5,
+          "1.5": 3.0,
+          "2.0": 4.0
+        }
+      ]
+    },
+    "resultNote": "The $ signs do the work: $A2 locks the column, B$1 locks the row.",
+    "formula": "=$A2 * B$1"
+  },
+  "W1D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "No",
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Only the Workload column decides the band.",
+    "task": "Classify each session light / standard / heavy, first with nested IF, then with IFS.",
+    "result": {
+      "columns": [
+        "No",
+        "Ast",
+        "Workload",
+        "Band"
+      ],
+      "rows": [
+        {
+          "No": 1,
+          "Ast": "AB",
+          "Workload": 2.5,
+          "Band": "heavy"
+        },
+        {
+          "No": 2,
+          "Ast": "BC",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 3,
+          "Ast": "CD",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 4,
+          "Ast": "DE",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 5,
+          "Ast": "EF",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 6,
+          "Ast": "FG",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 7,
+          "Ast": "GH",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 8,
+          "Ast": "HI",
+          "Workload": 2.5,
+          "Band": "heavy"
+        },
+        {
+          "No": 9,
+          "Ast": "IJ",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 10,
+          "Ast": "JK",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 11,
+          "Ast": "KL",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 12,
+          "Ast": "LM",
+          "Workload": 1.0,
+          "Band": "light"
+        }
+      ]
+    },
+    "resultNote": "IFS reads top to bottom and stops at the first TRUE, so order the tests narrowest first.",
+    "formula": "=IFS([@Workload]<1.5,\"light\",[@Workload]<2.5,\"standard\",TRUE,\"heavy\")"
+  },
+  "W1D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Three columns are enough: Group to bucket by, Lecturer Type to filter, Workload to add up.",
+    "task": "Per Group: session count, total workload, VC count, and average workload.",
+    "result": {
+      "columns": [
+        "Group",
+        "Sessions",
+        "Total Workload",
+        "VC Sessions",
+        "Avg Workload"
+      ],
+      "rows": [
+        {
+          "Group": "G1",
+          "Sessions": 9,
+          "Total Workload": 16.0,
+          "VC Sessions": 6,
+          "Avg Workload": 1.78
+        },
+        {
+          "Group": "G2",
+          "Sessions": 8,
+          "Total Workload": 14.5,
+          "VC Sessions": 6,
+          "Avg Workload": 1.81
+        },
+        {
+          "Group": "G3",
+          "Sessions": 8,
+          "Total Workload": 13.5,
+          "VC Sessions": 5,
+          "Avg Workload": 1.69
+        },
+        {
+          "Group": "G4",
+          "Sessions": 8,
+          "Total Workload": 13.5,
+          "VC Sessions": 5,
+          "Avg Workload": 1.69
+        },
+        {
+          "Group": "G5",
+          "Sessions": 8,
+          "Total Workload": 14.5,
+          "VC Sessions": 6,
+          "Avg Workload": 1.81
+        }
+      ]
+    },
+    "resultNote": "Check it: the Sessions column must sum to 41, the row count of the source.",
+    "formula": "=COUNTIFS(Group,$A2)   =SUMIFS(Workload,Group,$A2)   =COUNTIFS(Group,$A2,Type,\"VC\")"
+  },
+  "W1D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Course Name"
+    ],
+    "inputNote": "The Ast column repeats \u2014 41 sessions across 21 people.",
+    "task": "Build a deduplicated, sorted assistant roster that updates itself when rows are added.",
+    "result": {
+      "columns": [
+        "Ast",
+        "Sessions"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Sessions": 2
+        },
+        {
+          "Ast": "BC",
+          "Sessions": 2
+        },
+        {
+          "Ast": "CD",
+          "Sessions": 2
+        },
+        {
+          "Ast": "DE",
+          "Sessions": 2
+        },
+        {
+          "Ast": "EF",
+          "Sessions": 2
+        },
+        {
+          "Ast": "FG",
+          "Sessions": 2
+        },
+        {
+          "Ast": "GH",
+          "Sessions": 2
+        },
+        {
+          "Ast": "HI",
+          "Sessions": 2
+        },
+        {
+          "Ast": "IJ",
+          "Sessions": 2
+        },
+        {
+          "Ast": "JK",
+          "Sessions": 2
+        }
+      ]
+    },
+    "resultNote": "Spilled, not dragged: one formula in one cell produces every row. Showing the first 10 of 21.",
+    "formula": "=SORT(UNIQUE(tblTeaching[Ast]))"
+  },
+  "W2D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Convert the range to a Table first (Ctrl+T), then name it tblTeaching.",
+    "task": "Rewrite a SUMIFS using structured references instead of A1-style ranges.",
+    "result": {
+      "columns": [
+        "Lecturer Type",
+        "Total Workload"
+      ],
+      "rows": [
+        {
+          "Lecturer Type": "VC",
+          "Total Workload": 58.0
+        },
+        {
+          "Lecturer Type": "Forum",
+          "Total Workload": 14.0
+        }
+      ]
+    },
+    "resultNote": "The formula stops mentioning cell addresses, so adding rows never breaks it.",
+    "formula": "=SUMIFS(tblTeaching[Workload], tblTeaching[Lecturer Type], \"VC\")"
+  },
+  "W2D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "The allowed values come from the data itself, not from a list you type.",
+    "task": "Add list dropdowns for Group and Lecturer Type, and reject Workload outside 0 to 1.",
+    "result": {
+      "columns": [
+        "Field",
+        "Rule",
+        "Allowed"
+      ],
+      "rows": [
+        {
+          "Field": "Group",
+          "Rule": "List",
+          "Allowed": "G1, G2, G3, G4, G5"
+        },
+        {
+          "Field": "Lecturer Type",
+          "Rule": "List",
+          "Allowed": "VC, Forum"
+        },
+        {
+          "Field": "Workload",
+          "Rule": "Decimal between",
+          "Allowed": "0 to 1"
+        }
+      ]
+    },
+    "resultNote": "Note the trap: real Workload values reach 2.5, so this rule rejects most of the sheet. That is the lesson \u2014 validation constrains new input, it does not clean existing data.",
+    "formula": "Data \u2192 Data Validation \u2192 Allow: List / Decimal"
+  },
+  "W2D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Course Name",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Two operations, in order: sort first, then filter.",
+    "task": "Sort by Group then Workload descending, then filter to VC sessions on Database Systems.",
+    "result": {
+      "columns": [
+        "Group",
+        "Course Name",
+        "Ast",
+        "Lecturer Type",
+        "Workload"
+      ],
+      "rows": [
+        {
+          "Group": "G3",
+          "Course Name": "Database Systems",
+          "Ast": "MN",
+          "Lecturer Type": "VC",
+          "Workload": 2.0
+        },
+        {
+          "Group": "G3",
+          "Course Name": "Database Systems",
+          "Ast": "BC",
+          "Lecturer Type": "VC",
+          "Workload": 2.0
+        }
+      ]
+    },
+    "resultNote": "2 rows survive both conditions. A filter hides rows, it does not delete them.",
+    "formula": "Data \u2192 Sort  \u00b7  Data \u2192 Filter"
+  },
+  "W2D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Course ID"
+    ],
+    "inputNote": "COMP6047001 \u2014 four letters, four digits, then the section.",
+    "task": "Split Course ID into department code, number and section digits.",
+    "result": {
+      "columns": [
+        "Course ID",
+        "Dept",
+        "Number",
+        "Section"
+      ],
+      "rows": [
+        {
+          "Course ID": "COMP6047001",
+          "Dept": "COMP",
+          "Number": "6047",
+          "Section": "001"
+        },
+        {
+          "Course ID": "COMP6048002",
+          "Dept": "COMP",
+          "Number": "6048",
+          "Section": "002"
+        },
+        {
+          "Course ID": "COMP6049003",
+          "Dept": "COMP",
+          "Number": "6049",
+          "Section": "003"
+        },
+        {
+          "Course ID": "COMP6050004",
+          "Dept": "COMP",
+          "Number": "6050",
+          "Section": "004"
+        },
+        {
+          "Course ID": "COMP6051005",
+          "Dept": "COMP",
+          "Number": "6051",
+          "Section": "005"
+        },
+        {
+          "Course ID": "COMP6052006",
+          "Dept": "COMP",
+          "Number": "6052",
+          "Section": "006"
+        },
+        {
+          "Course ID": "COMP6053007",
+          "Dept": "COMP",
+          "Number": "6053",
+          "Section": "007"
+        },
+        {
+          "Course ID": "COMP6054008",
+          "Dept": "COMP",
+          "Number": "6054",
+          "Section": "008"
+        }
+      ]
+    },
+    "resultNote": "RIGHT needs LEN because the section length is not fixed \u2014 hard-coding 3 breaks on the first exception.",
+    "formula": "=LEFT(A2,4)   =MID(A2,5,4)   =RIGHT(A2,LEN(A2)-8)"
+  },
+  "W2D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Course Name"
+    ],
+    "inputNote": "SEARCH returns a position on a hit and #VALUE! on a miss \u2014 the error is the signal.",
+    "task": "Flag every course whose name contains \"Database\", blank otherwise.",
+    "result": {
+      "columns": [
+        "Course Name",
+        "Position",
+        "Flag"
+      ],
+      "rows": [
+        {
+          "Course Name": "Algorithm and Programming",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Data Structures",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Database Systems",
+          "Position": 1,
+          "Flag": true
+        },
+        {
+          "Course Name": "Operating Systems",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Computer Networks",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Software Engineering",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Web Programming",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Mobile Development",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Machine Learning",
+          "Position": "",
+          "Flag": ""
+        },
+        {
+          "Course Name": "Human Computer Interaction",
+          "Position": "",
+          "Flag": ""
+        }
+      ]
+    },
+    "resultNote": "Without IFERROR the column fills with #VALUE!, which is correct and unreadable. Wrapping it turns a miss into a blank.",
+    "formula": "=IFERROR(IF(SEARCH(\"Database\",A2)>0,TRUE,\"\"),\"\")"
+  }
+}
