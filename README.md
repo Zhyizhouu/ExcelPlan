@@ -46,9 +46,10 @@ smallest I know how to make it.
 - **Motivation design, deliberately restrained.** No streak-loss warnings, no
   manufactured urgency, no confetti per checkbox. The one thing that celebrates
   is finishing a phase, once.
-- **Refuse the unrecoverable action.** Saving a workbook will not overwrite an
-  existing one and offers no force flag, because that file is where the answers
-  get written.
+- **Refuse the unrecoverable action.** A workbook already in the vault is never
+  written over, and there is no force flag to make it — that file is where the
+  answers get typed. Opening a case you have already started hands you back
+  exactly what you left.
 
 The honest summary: I set out to learn Excel and ended up shipping a small
 full-stack tool to keep myself learning Excel. Both were worth the time — but
@@ -187,30 +188,41 @@ No streak-loss warnings, no artificial urgency, no confetti per checkbox.
 
 ## Getting a case into Excel
 
-Each case detail page offers three routes out.
+Each case detail page offers four routes out.
 
-**Save to vault & open** is the primary one, and the one the habit runs on. It
-writes a three-sheet workbook to `Phase <x>/<Case> - Answer.xlsx`, beside its
-note, and opens it in Excel straight away:
+**Open in Excel** is the primary one, and the one the habit runs on. It puts a
+three-sheet workbook at `Phase <x>/<Case> - Answer.xlsx`, beside its note, and
+opens it:
 
 - **Brief** — the case as written
 - **Data** — the input table
 - **Expected** — the answer, on its own sheet so opening the file does not give
   it away
 
-The other two are for working somewhere else: **Download .xlsx** for another
-machine, **Copy as CSV** for a sheet that's already open.
+**Save to vault** does the same without the launch, for stocking up a few cases
+ahead of a session you are not starting yet. **Download .xlsx** and **Copy as
+CSV** are for working somewhere else — another machine, or a sheet already
+open.
 
 Three deliberate constraints:
 
-**Save never overwrites.** That file is where the answers get written, so
-replacing it would be the one unrecoverable thing this app could do. A second
-save returns 409 and says to delete or rename first.
+**An existing workbook is never written to.** That file is where the answers
+get typed, and replacing it is the single unrecoverable thing this app could
+do. So the button that opens a case you have already started opens *your*
+workbook, answers and all — it does not rebuild it, and there is no force flag
+anywhere to make it. The guarantee is `O_EXCL` on the create, not a check-then-
+write that a race could slip through.
+
+Nor is a second visit an error. Both buttons mean "get me into this case", and
+after the first one that is a file which already exists; the old 409 made the
+safe path feel like a failure. It reports `created: false` instead, and the
+page says the file was left untouched.
 
 **Opening is the server's job.** The file is on the same machine as the
-backend, and a browser has no way to hand a local path to Excel. If the launch
-fails the page says so plainly — the save itself still succeeded, and claiming
-otherwise would invite a second click straight into that 409.
+backend, and a browser has no way to hand a local path to Excel. A failed
+launch is not a failed save — the page says the workbook is there and to open
+it by hand, because reporting failure would send you looking for a file you
+already have.
 
 **The Data sheet is a plain styled range, not an Excel Table.** W2D1's whole
 exercise is converting a range with Ctrl+T; shipping a Table pre-made would
