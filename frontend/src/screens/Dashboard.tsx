@@ -1,8 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Progress } from "../api/progress";
 import { statusOf } from "../api/progress";
 import { Badge, Button, Card, ProgressBar } from "../components/ui";
-import { formatDate, momentum, takeNewlyComplete } from "../lib/momentum";
+import { PaceCard } from "../components/PaceCard";
+import {
+  casesPerWeek,
+  formatDate,
+  loadPaceSettings,
+  momentum,
+  savePaceSettings,
+  takeNewlyComplete,
+  type PaceSettings,
+} from "../lib/momentum";
 import { useSession } from "../app/session";
 
 /**
@@ -23,7 +32,21 @@ export function Dashboard({
   onOpenCase: (slug: string) => void;
 }) {
   const { name } = useSession();
-  const m = useMemo(() => momentum(progress), [progress]);
+
+  // Read from storage once, on the initialiser, so the first paint already has
+  // the saved pace — a projection that renders at the default and then jumps
+  // to your real one reads as the number being unreliable.
+  const [settings, setSettings] = useState<PaceSettings>(loadPaceSettings);
+
+  const m = useMemo(
+    () => momentum(progress, new Date(), settings.pace),
+    [progress, settings.pace],
+  );
+
+  const changePace = (next: PaceSettings) => {
+    setSettings(next);
+    savePaceSettings(next);
+  };
 
   // Read once per mount: this both reports and records, so calling it during
   // render of a memo would re-fire on every re-render and swallow the banner.
@@ -137,10 +160,14 @@ export function Dashboard({
           detail={
             done
               ? "Every phase closed"
-              : `${m.remaining} left · about ${m.weeksLeft} ${m.weeksLeft === 1 ? "week" : "weeks"} at five a week`
+              : `${m.remaining} left · about ${m.weeksLeft} ${m.weeksLeft === 1 ? "week" : "weeks"} at ${casesPerWeek(settings.pace)} a week`
           }
         />
       </div>
+
+      {/* Below the stats, not among them: the others report where you are,
+          this one is a thing you change. */}
+      <PaceCard progress={progress} settings={settings} onChange={changePace} />
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-ink">Phases</h2>

@@ -41,7 +41,7 @@ smallest I know how to make it.
   app never keeps a competing copy. A tracker that disagrees with your notes is
   worse than no tracker, because now you have to reconcile two records.
 - **Every number is arithmetic you can check by hand.** The projected finish
-  date is `remaining ÷ 5 per week` — no smoothing, no model. A projection
+  date is `remaining ÷ your weekly rate` — no smoothing, no model. A projection
   nobody believes is worse than none at all.
 - **Motivation design, deliberately restrained.** No streak-loss warnings, no
   manufactured urgency, no confetti per checkbox. The one thing that celebrates
@@ -172,8 +172,27 @@ Deliberately restrained. Every number shown is arithmetic on real data:
 
 - **Next up** is the largest thing on the dashboard, because choosing what to
   do is the step that gets skipped a day over. It is already chosen.
-- **The finish date** is `remaining ÷ 5 per week`, from the plan's own stated
-  cadence. Checkable by hand — a projection nobody believes is worse than none.
+- **The finish date** is `remaining ÷ your weekly rate`, defaulting to the
+  plan's own stated cadence of five a week. Checkable by hand — a projection
+  nobody believes is worse than none.
+- **The pace card** runs that arithmetic from both ends. *From a pace* takes
+  cases-a-day and days-a-week and returns a date; *from a date* takes the
+  deadline and returns the pace it would cost. The second is the one that
+  earns its place: a projected date you dislike tells you nothing about what
+  to change, whereas "that date needs 3.6 a study day instead of 1" is a
+  decision — often the decision to move the date, which is a legitimate answer.
+
+  The rate is two inputs rather than one because "a case a day" is ambiguous
+  in exactly the way that matters: five a week and seven a week are six
+  calendar weeks apart over 110 cases. Splitting it into cases-per-sitting and
+  sittings-per-week makes the assumption visible instead of letting the
+  arithmetic pick one silently. The default — one a day, five days a week —
+  reproduces the old fixed projection exactly, so the feature is opt-in rather
+  than a silent recalculation of a number you had already learned to trust.
+
+  Required paces are not rounded down to look achievable, and the projection
+  charges a whole sitting for a partial one, because you cannot do four fifths
+  of a study session.
 - **The streak** counts distinct days with at least one completion, not
   consecutive cases, so five cases in one sitting is one day of momentum. It
   survives through today rather than resetting at midnight, because studying at
