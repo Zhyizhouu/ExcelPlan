@@ -1,6 +1,6 @@
 # ExcelPlan
 
-A progress tracker for the **Excel Mastery** study plan — 110 daily cases over
+A progress tracker for the **Excel Mastery** study plan — 127 cases over
 ~22 weeks — read straight out of the Obsidian vault the plan already lives in.
 
 The vault stays the source of truth. Cases are worked and ticked in Obsidian;
@@ -17,8 +17,8 @@ data nobody else wants to touch, and building something a colleague can open
 six months later and still trust.
 
 Rather than wait for that skill to arrive on the job, I decided to close the
-gap deliberately. I wrote out a 110-case, 22-week curriculum in Obsidian —
-five cases a week, each one a small realistic problem rather than a tutorial to
+gap deliberately. I wrote out a 22-week, 127-case curriculum in Obsidian —
+five short cases a week plus a weekly build that ties them together, each one a small realistic problem rather than a tutorial to
 follow along with — and started on a Monday.
 
 The plan was the easy part. Everyone can write a plan on a Monday.
@@ -114,6 +114,11 @@ are the point.
 
 ## How progress is read
 
+Each week runs five short day cases (`W1D1`–`W1D5`) plus a longer **weekly
+build** (`W1D6`) that puts the week's five techniques into one deliverable. The
+five weeks that already end in a phase capstone have no D6 — a second
+integrative case there would be redundant.
+
 Each day note ends with one checkbox:
 
 ```markdown
@@ -184,7 +189,7 @@ Deliberately restrained. Every number shown is arithmetic on real data:
 
   The rate is two inputs rather than one because "a case a day" is ambiguous
   in exactly the way that matters: five a week and seven a week are six
-  calendar weeks apart over 110 cases. Splitting it into cases-per-sitting and
+  calendar weeks apart over 127 cases. Splitting it into cases-per-sitting and
   sittings-per-week makes the assumption visible instead of letting the
   arithmetic pick one silently. The default — one a day, five days a week —
   reproduces the old fixed projection exactly, so the feature is opt-in rather
@@ -199,7 +204,7 @@ Deliberately restrained. Every number shown is arithmetic on real data:
   10pm should not be punished for not having happened by breakfast.
 - **Phase completion** is the only thing that celebrates, once, and never
   again for the same phase. A checkbox is too small to interrupt for; the whole
-  110-case plan is too far off to feel reachable.
+  127-case plan is too far off to feel reachable.
 
 No streak-loss warnings, no artificial urgency, no confetti per checkbox.
 
@@ -210,13 +215,21 @@ No streak-loss warnings, no artificial urgency, no confetti per checkbox.
 Each case detail page offers four routes out.
 
 **Open in Excel** is the primary one, and the one the habit runs on. It puts a
-three-sheet workbook at `Phase <x>/<Case> - Answer.xlsx`, beside its note, and
+four-sheet workbook at `Phase <x>/<Case> - Answer.xlsx`, beside its note, and
 opens it:
 
-- **Brief** — the case as written
+- **Brief** — the case as written, plus the headers your answer table needs
 - **Data** — the input table
+- **Answer** — blank; you build your own table here, anywhere on the sheet
 - **Expected** — the answer, on its own sheet so opening the file does not give
   it away
+
+**Check my answer** (Week 2 onwards) reads the saved workbook and compares your
+table with the expected result: the values, the row order where it matters,
+whether the required functions appear, and whether answers are formulas rather
+than typed values. It is plain comparison, not AI, so the same file always gets
+the same verdict. What it cannot see, such as a chart or what happens when you
+change a control cell, is listed as not checked.
 
 **Save to vault** does the same without the launch, for stocking up a few cases
 ahead of a session you are not starting yet. **Download .xlsx** and **Copy as
@@ -231,6 +244,11 @@ do. So the button that opens a case you have already started opens *your*
 workbook, answers and all — it does not rebuild it, and there is no force flag
 anywhere to make it. The guarantee is `O_EXCL` on the create, not a check-then-
 write that a race could slip through.
+
+The one exception is a workbook made before the Answer sheet existed. The case
+page flags it and offers **Replace with new template**, which asks for
+confirmation, refuses any workbook that already has an Answer sheet, and moves
+the old file to the Recycle Bin rather than deleting it.
 
 Nor is a second visit an error. Both buttons mean "get me into this case", and
 after the first one that is a file which already exists; the old 409 made the
@@ -261,7 +279,7 @@ cd frontend && npm test && npm run check
 ```
 
 The backend suite includes tests that run against the **real vault** and skip
-cleanly when it is absent — they assert the actual 110-note count, the merged
+cleanly when it is absent — they assert the actual 127-note count, the merged
 phase, and correct ordering, so a change to the real notes fails a test before
 it surfaces as a wrong number on screen.
 

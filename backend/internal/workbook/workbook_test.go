@@ -71,9 +71,9 @@ func TestBuild(t *testing.T) {
 	}
 	f := open(t, data)
 
-	t.Run("has exactly the three expected sheets", func(t *testing.T) {
+	t.Run("has exactly the four expected sheets, in order", func(t *testing.T) {
 		got := f.GetSheetList()
-		want := []string{sheetBrief, sheetData, sheetExpected}
+		want := []string{sheetBrief, sheetData, sheetAnswer, sheetExpected}
 		if len(got) != len(want) {
 			t.Fatalf("sheets = %v, want %v", got, want)
 		}
@@ -138,6 +138,30 @@ func TestBuild(t *testing.T) {
 		}
 	})
 
+	t.Run("the Answer sheet is blank", func(t *testing.T) {
+		rows, err := f.GetRows(sheetAnswer)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(rows) != 0 {
+			t.Fatalf("Answer sheet should start empty, got %v", rows)
+		}
+	})
+
+	// The judge matches on these names, so the brief has to state them.
+	t.Run("the brief names the headers the judge looks for", func(t *testing.T) {
+		rows, _ := f.GetRows(sheetBrief)
+		for _, row := range rows {
+			if len(row) > 1 && row[0] == "Headers" {
+				if row[1] != "Ast, Total" {
+					t.Fatalf("Headers = %q, want %q", row[1], "Ast, Total")
+				}
+				return
+			}
+		}
+		t.Fatal("no Headers row on the Brief sheet")
+	})
+
 	t.Run("the brief carries the note's own fields", func(t *testing.T) {
 		rows, _ := f.GetRows(sheetBrief)
 		var joined strings.Builder
@@ -154,7 +178,7 @@ func TestBuild(t *testing.T) {
 }
 
 // A case with no worked example must still produce a valid file rather than
-// an error — most of the 110 are in that state.
+// an error — most of the 127 are in that state.
 func TestBuildWithoutExample(t *testing.T) {
 	data, err := Build(sampleNote(), datasets.Example{}, nil)
 	if err != nil {
@@ -162,12 +186,39 @@ func TestBuildWithoutExample(t *testing.T) {
 	}
 	f := open(t, data)
 
-	if len(f.GetSheetList()) != 3 {
-		t.Fatalf("sheets = %v, want all three even when empty", f.GetSheetList())
+	if len(f.GetSheetList()) != 4 {
+		t.Fatalf("sheets = %v, want all four even when empty", f.GetSheetList())
 	}
 	rows, _ := f.GetRows(sheetData)
 	if len(rows) == 0 || !strings.Contains(rows[0][0], "No data") {
 		t.Fatalf("empty data sheet should explain itself, got %v", rows)
+	}
+}
+
+// Replacing a workbook hangs on this answer, so both sides of it are pinned.
+func TestHasAnswerSheet(t *testing.T) {
+	data, err := Build(sampleNote(), sampleExample(), sampleTable())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if has, err := HasAnswerSheet(data); err != nil || !has {
+		t.Fatalf("new workbook: has = %v, err = %v", has, err)
+	}
+
+	f := open(t, data)
+	if err := f.DeleteSheet(sheetAnswer); err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		t.Fatal(err)
+	}
+	if has, err := HasAnswerSheet(buf.Bytes()); err != nil || has {
+		t.Fatalf("old-template workbook: has = %v, err = %v", has, err)
+	}
+
+	if _, err := HasAnswerSheet([]byte("not a workbook")); err == nil {
+		t.Fatal("expected an error for a file that is not a workbook")
 	}
 }
 

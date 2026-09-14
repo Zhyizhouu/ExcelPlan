@@ -15,10 +15,12 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/Zhyizhouu/excelplan/internal/datasets"
 	"github.com/Zhyizhouu/excelplan/internal/progresslog"
+	"github.com/Zhyizhouu/excelplan/internal/tutor"
 	"github.com/Zhyizhouu/excelplan/internal/vault"
 )
 
@@ -27,10 +29,27 @@ type Server struct {
 	hubNotePath string
 	log         *progresslog.Log
 	logger      *slog.Logger
+	// Nil when no Gemini key is configured. The whole app works without one;
+	// only the tutor tab says it needs setting up.
+	tutor    *tutor.Client
+	tutorLog *tutor.Store
 }
 
-func New(vaultRoot, hubNotePath string, log *progresslog.Log, logger *slog.Logger) *Server {
-	return &Server{vaultRoot: vaultRoot, hubNotePath: hubNotePath, log: log, logger: logger}
+func New(
+	vaultRoot, hubNotePath string,
+	log *progresslog.Log,
+	tutorClient *tutor.Client,
+	tutorLog *tutor.Store,
+	logger *slog.Logger,
+) *Server {
+	return &Server{
+		vaultRoot:   vaultRoot,
+		hubNotePath: hubNotePath,
+		log:         log,
+		tutor:       tutorClient,
+		tutorLog:    tutorLog,
+		logger:      logger,
+	}
 }
 
 func (s *Server) Handler() http.Handler {
@@ -44,6 +63,12 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/notes/{slug}/workbook.xlsx", s.handleDownloadWorkbook)
 	mux.HandleFunc("GET /v1/notes/{slug}/data.csv", s.handleCSV)
 	mux.HandleFunc("POST /v1/notes/{slug}/workbook", s.handleSaveWorkbook)
+	mux.HandleFunc("GET /v1/notes/{slug}/workbook/status", s.handleWorkbookStatus)
+	mux.HandleFunc("POST /v1/notes/{slug}/workbook/replace", s.handleReplaceWorkbook)
+	mux.HandleFunc("GET /v1/notes/{slug}/judge", s.handleJudge)
+	mux.HandleFunc("GET /v1/notes/{slug}/tutor", s.handleTutorThread)
+	mux.HandleFunc("POST /v1/notes/{slug}/tutor", s.handleTutorAsk)
+	mux.HandleFunc("DELETE /v1/notes/{slug}/tutor", s.handleTutorClear)
 	return withCORS(withLogging(mux, s.logger))
 }
 
@@ -57,6 +82,11 @@ type noteResponse struct {
 	Note    vault.Note        `json:"note"`
 	Example *datasets.Example `json:"example,omitempty"`
 	Dataset *datasets.Table   `json:"dataset,omitempty"`
+	// How many cases have a worked example at all. Sent so the page can say
+	// what coverage actually is rather than naming the phases it believes are
+	// covered — a claim that was already wrong once, the moment the weekly
+	// build cases landed inside Phase 0 and Week 2.
+	ExampleCount int `json:"exampleCount"`
 }
 
 func (s *Server) handleNote(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +98,7 @@ func (s *Server) handleNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out := noteResponse{Note: note}
+	out := noteResponse{Note: note, ExampleCount: datasets.HaveExamples()}
 	if example, ok := datasets.ExampleFor(note.Slug); ok {
 		out.Example = &example
 		if table, ok := datasets.Get(example.DatasetID); ok {
@@ -104,7 +134,7 @@ func pick(t datasets.Table, columns []string) *datasets.Table {
 }
 
 // progressResponse is the whole dashboard in one payload — every screen this
-// app has renders from one call, because the plan is small enough (110 notes)
+// app has renders from one call, because the plan is small enough (127 notes)
 // that splitting it into paginated or per-phase requests would only add
 // round trips for no real saving.
 type progressResponse struct {
@@ -203,13 +233,16 @@ func withLogging(next http.Handler, logger *slog.Logger) http.Handler {
 	})
 }
 
-// withCORS allows the Vite dev server's origin. This app is one person's
-// local tool, never deployed, so the allowlist is deliberately small rather
-// than configurable — there is no second origin it ever needs to trust.
+// withCORS allows the Vite dev server's origin and the packaged desktop
+// app's embedded webview. This app is one person's local tool, never
+// deployed, so the allowlist is deliberately small rather than configurable
+// — there is no second real origin it ever needs to trust.
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		if origin := r.Header.Get("Origin"); isAllowedOrigin(origin) {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
@@ -217,6 +250,21 @@ func withCORS(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// isAllowedOrigin covers the Vite dev server (http://localhost:5173) and
+// Wails' embedded-webview origin. Wails serves the frontend from
+// "wails.localhost" on Windows and "wails://wails" on macOS/Linux — this app
+// only ever ships for Windows, but both are harmless to allow.
+func isAllowedOrigin(origin string) bool {
+	if origin == "http://localhost:5173" || origin == "wails://wails" {
+		return true
+	}
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+	return u.Hostname() == "wails.localhost"
 }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {

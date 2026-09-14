@@ -555,11 +555,12 @@
   "workshift": {
     "id": "workshift",
     "name": "Workshift Data",
-    "description": "40 assistants, Monday to Saturday. P = Pagi, N = Normal, M = Malam. Blank means no shift that day.",
+    "description": "40 assistants, Monday to Saturday. P = Pagi, N = Normal, M = Malam. Blank means no shift that day. Gen is the cohort each assistant joined in, 24-1 to 26-1, eight people each.",
     "columns": [
       "No",
       "Inisial",
       "Name",
+      "Gen",
       "Mon",
       "Tue",
       "Wed",
@@ -572,6 +573,7 @@
         "No": 1,
         "Inisial": "AB",
         "Name": "Alfred Abner",
+        "Gen": "24-1",
         "Mon": "M",
         "Tue": "P",
         "Wed": "N",
@@ -583,6 +585,7 @@
         "No": 2,
         "Inisial": "BC",
         "Name": "Bianca Chandra",
+        "Gen": "24-1",
         "Mon": "N",
         "Tue": "N",
         "Wed": "",
@@ -594,6 +597,7 @@
         "No": 3,
         "Inisial": "CD",
         "Name": "Cindy Dewi",
+        "Gen": "24-1",
         "Mon": "P",
         "Tue": "",
         "Wed": "M",
@@ -605,6 +609,7 @@
         "No": 4,
         "Inisial": "DE",
         "Name": "Devan Eka",
+        "Gen": "24-1",
         "Mon": "M",
         "Tue": "N",
         "Wed": "N",
@@ -616,6 +621,7 @@
         "No": 5,
         "Inisial": "EF",
         "Name": "Erika Fitri",
+        "Gen": "24-1",
         "Mon": "M",
         "Tue": "P",
         "Wed": "P",
@@ -627,6 +633,7 @@
         "No": 6,
         "Inisial": "FG",
         "Name": "Farhan Gunawan",
+        "Gen": "24-1",
         "Mon": "P",
         "Tue": "N",
         "Wed": "",
@@ -638,6 +645,7 @@
         "No": 7,
         "Inisial": "GH",
         "Name": "Gilang Hakim",
+        "Gen": "24-1",
         "Mon": "N",
         "Tue": "N",
         "Wed": "P",
@@ -649,6 +657,7 @@
         "No": 8,
         "Inisial": "HI",
         "Name": "Hana Indah",
+        "Gen": "24-1",
         "Mon": "N",
         "Tue": "",
         "Wed": "N",
@@ -660,6 +669,7 @@
         "No": 9,
         "Inisial": "IJ",
         "Name": "Irfan Jaya",
+        "Gen": "24-2",
         "Mon": "P",
         "Tue": "P",
         "Wed": "M",
@@ -671,6 +681,7 @@
         "No": 10,
         "Inisial": "JK",
         "Name": "Jessica Kurnia",
+        "Gen": "24-2",
         "Mon": "N",
         "Tue": "",
         "Wed": "N",
@@ -682,6 +693,7 @@
         "No": 11,
         "Inisial": "KL",
         "Name": "Kevin Lesmana",
+        "Gen": "24-2",
         "Mon": "P",
         "Tue": "",
         "Wed": "",
@@ -693,6 +705,7 @@
         "No": 12,
         "Inisial": "LM",
         "Name": "Linda Maharani",
+        "Gen": "24-2",
         "Mon": "P",
         "Tue": "N",
         "Wed": "",
@@ -704,6 +717,7 @@
         "No": 13,
         "Inisial": "MN",
         "Name": "Michael Nugroho",
+        "Gen": "24-2",
         "Mon": "P",
         "Tue": "",
         "Wed": "P",
@@ -715,6 +729,7 @@
         "No": 14,
         "Inisial": "NO",
         "Name": "Nadia Oktavia",
+        "Gen": "24-2",
         "Mon": "M",
         "Tue": "N",
         "Wed": "M",
@@ -726,6 +741,7 @@
         "No": 15,
         "Inisial": "OP",
         "Name": "Oscar Pratama",
+        "Gen": "24-2",
         "Mon": "P",
         "Tue": "",
         "Wed": "P",
@@ -737,6 +753,7 @@
         "No": 16,
         "Inisial": "PQ",
         "Name": "Putri Qonita",
+        "Gen": "24-2",
         "Mon": "M",
         "Tue": "P",
         "Wed": "N",
@@ -748,6 +765,7 @@
         "No": 17,
         "Inisial": "QR",
         "Name": "Qori Rahman",
+        "Gen": "25-1",
         "Mon": "P",
         "Tue": "P",
         "Wed": "",
@@ -759,6 +777,7 @@
         "No": 18,
         "Inisial": "RS",
         "Name": "Rian Santoso",
+        "Gen": "25-1",
         "Mon": "N",
         "Tue": "N",
         "Wed": "P",
@@ -770,6 +789,7 @@
         "No": 19,
         "Inisial": "ST",
         "Name": "Sinta Tanuwijaya",
+        "Gen": "25-1",
         "Mon": "M",
         "Tue": "N",
         "Wed": "N",
@@ -781,6 +801,7 @@
         "No": 20,
         "Inisial": "TU",
         "Name": "Toni Utama",
+        "Gen": "25-1",
         "Mon": "P",
         "Tue": "P",
         "Wed": "P",
@@ -792,6 +813,7 @@
         "No": 21,
         "Inisial": "UV",
         "Name": "Umar Vidianto",
+        "Gen": "25-1",
         "Mon": "N",
         "Tue": "N",
         "Wed": "M",
@@ -803,6 +825,7 @@
         "No": 22,
         "Inisial": "VW",
         "Name": "Vina Wijaya",
+        "Gen": "25-1",
         "Mon": "M",
         "Tue": "N",
         "Wed": "P",
@@ -814,6 +837,7 @@
         "No": 23,
         "Inisial": "WX",
         "Name": "Wahyu Xaverius",
+        "Gen": "25-1",
         "Mon": "N",
         "Tue": "P",
         "Wed": "",
@@ -825,6 +849,7 @@
         "No": 24,
         "Inisial": "XY",
         "Name": "Xena Yulianti",
+        "Gen": "25-1",
         "Mon": "M",
         "Tue": "P",
         "Wed": "",
@@ -836,6 +861,7 @@
         "No": 25,
         "Inisial": "YZ",
         "Name": "Yoga Zulkarnain",
+        "Gen": "25-2",
         "Mon": "P",
         "Tue": "P",
         "Wed": "P",
@@ -847,6 +873,7 @@
         "No": 26,
         "Inisial": "AC",
         "Name": "Adit Cahyono",
+        "Gen": "25-2",
         "Mon": "N",
         "Tue": "",
         "Wed": "N",
@@ -858,6 +885,7 @@
         "No": 27,
         "Inisial": "BD",
         "Name": "Bella Damayanti",
+        "Gen": "25-2",
         "Mon": "M",
         "Tue": "M",
         "Wed": "M",
@@ -869,6 +897,7 @@
         "No": 28,
         "Inisial": "CE",
         "Name": "Chris Eriawan",
+        "Gen": "25-2",
         "Mon": "M",
         "Tue": "M",
         "Wed": "N",
@@ -880,6 +909,7 @@
         "No": 29,
         "Inisial": "DF",
         "Name": "Dian Fadhil",
+        "Gen": "25-2",
         "Mon": "N",
         "Tue": "P",
         "Wed": "P",
@@ -891,6 +921,7 @@
         "No": 30,
         "Inisial": "EG",
         "Name": "Eko Gunadi",
+        "Gen": "25-2",
         "Mon": "N",
         "Tue": "",
         "Wed": "P",
@@ -902,6 +933,7 @@
         "No": 31,
         "Inisial": "FH",
         "Name": "Fira Halim",
+        "Gen": "25-2",
         "Mon": "M",
         "Tue": "N",
         "Wed": "",
@@ -913,6 +945,7 @@
         "No": 32,
         "Inisial": "GI",
         "Name": "Galih Iskandar",
+        "Gen": "25-2",
         "Mon": "N",
         "Tue": "P",
         "Wed": "N",
@@ -924,6 +957,7 @@
         "No": 33,
         "Inisial": "HJ",
         "Name": "Hendra Joko",
+        "Gen": "26-1",
         "Mon": "M",
         "Tue": "M",
         "Wed": "P",
@@ -935,6 +969,7 @@
         "No": 34,
         "Inisial": "IK",
         "Name": "Intan Kartika",
+        "Gen": "26-1",
         "Mon": "N",
         "Tue": "",
         "Wed": "P",
@@ -946,6 +981,7 @@
         "No": 35,
         "Inisial": "JL",
         "Name": "Joni Lukman",
+        "Gen": "26-1",
         "Mon": "P",
         "Tue": "M",
         "Wed": "P",
@@ -957,6 +993,7 @@
         "No": 36,
         "Inisial": "KM",
         "Name": "Karin Mulyadi",
+        "Gen": "26-1",
         "Mon": "",
         "Tue": "N",
         "Wed": "P",
@@ -968,6 +1005,7 @@
         "No": 37,
         "Inisial": "LN",
         "Name": "Lukas Nathan",
+        "Gen": "26-1",
         "Mon": "P",
         "Tue": "",
         "Wed": "N",
@@ -979,6 +1017,7 @@
         "No": 38,
         "Inisial": "MO",
         "Name": "Mira Oktora",
+        "Gen": "26-1",
         "Mon": "",
         "Tue": "P",
         "Wed": "M",
@@ -990,6 +1029,7 @@
         "No": 39,
         "Inisial": "NP",
         "Name": "Nanda Putra",
+        "Gen": "26-1",
         "Mon": "P",
         "Tue": "N",
         "Wed": "P",
@@ -1001,12 +1041,266 @@
         "No": 40,
         "Inisial": "OQ",
         "Name": "Omar Qadri",
+        "Gen": "26-1",
         "Mon": "N",
         "Tue": "N",
         "Wed": "",
         "Thu": "P",
         "Fri": "N",
         "Sat": "P"
+      }
+    ]
+  },
+  "import": {
+    "id": "import",
+    "name": "Roster import",
+    "description": "The roster beside eight names pasted in from another system, deliberately dirty: mixed case, stray spaces, and one non-breaking space.",
+    "columns": [
+      "No",
+      "Inisial",
+      "Name",
+      "Imported Name"
+    ],
+    "rows": [
+      {
+        "No": 1,
+        "Inisial": "AB",
+        "Name": "Alfred Abner",
+        "Imported Name": "hana indah"
+      },
+      {
+        "No": 2,
+        "Inisial": "BC",
+        "Name": "Bianca Chandra",
+        "Imported Name": "  Cindy Dewi"
+      },
+      {
+        "No": 3,
+        "Inisial": "CD",
+        "Name": "Cindy Dewi",
+        "Imported Name": "TONI UTAMA"
+      },
+      {
+        "No": 4,
+        "Inisial": "DE",
+        "Name": "Devan Eka",
+        "Imported Name": "Linda Maharani\u00a0"
+      },
+      {
+        "No": 5,
+        "Inisial": "EF",
+        "Name": "Erika Fitri",
+        "Imported Name": "erika fitri"
+      },
+      {
+        "No": 6,
+        "Inisial": "FG",
+        "Name": "Farhan Gunawan",
+        "Imported Name": "Fira Halim  "
+      },
+      {
+        "No": 7,
+        "Inisial": "GH",
+        "Name": "Gilang Hakim",
+        "Imported Name": "QORI rahman"
+      },
+      {
+        "No": 8,
+        "Inisial": "HI",
+        "Name": "Hana Indah",
+        "Imported Name": "adit cahyono"
+      },
+      {
+        "No": 9,
+        "Inisial": "IJ",
+        "Name": "Irfan Jaya",
+        "Imported Name": ""
+      },
+      {
+        "No": 10,
+        "Inisial": "JK",
+        "Name": "Jessica Kurnia",
+        "Imported Name": ""
+      },
+      {
+        "No": 11,
+        "Inisial": "KL",
+        "Name": "Kevin Lesmana",
+        "Imported Name": ""
+      },
+      {
+        "No": 12,
+        "Inisial": "LM",
+        "Name": "Linda Maharani",
+        "Imported Name": ""
+      },
+      {
+        "No": 13,
+        "Inisial": "MN",
+        "Name": "Michael Nugroho",
+        "Imported Name": ""
+      },
+      {
+        "No": 14,
+        "Inisial": "NO",
+        "Name": "Nadia Oktavia",
+        "Imported Name": ""
+      },
+      {
+        "No": 15,
+        "Inisial": "OP",
+        "Name": "Oscar Pratama",
+        "Imported Name": ""
+      },
+      {
+        "No": 16,
+        "Inisial": "PQ",
+        "Name": "Putri Qonita",
+        "Imported Name": ""
+      },
+      {
+        "No": 17,
+        "Inisial": "QR",
+        "Name": "Qori Rahman",
+        "Imported Name": ""
+      },
+      {
+        "No": 18,
+        "Inisial": "RS",
+        "Name": "Rian Santoso",
+        "Imported Name": ""
+      },
+      {
+        "No": 19,
+        "Inisial": "ST",
+        "Name": "Sinta Tanuwijaya",
+        "Imported Name": ""
+      },
+      {
+        "No": 20,
+        "Inisial": "TU",
+        "Name": "Toni Utama",
+        "Imported Name": ""
+      },
+      {
+        "No": 21,
+        "Inisial": "UV",
+        "Name": "Umar Vidianto",
+        "Imported Name": ""
+      },
+      {
+        "No": 22,
+        "Inisial": "VW",
+        "Name": "Vina Wijaya",
+        "Imported Name": ""
+      },
+      {
+        "No": 23,
+        "Inisial": "WX",
+        "Name": "Wahyu Xaverius",
+        "Imported Name": ""
+      },
+      {
+        "No": 24,
+        "Inisial": "XY",
+        "Name": "Xena Yulianti",
+        "Imported Name": ""
+      },
+      {
+        "No": 25,
+        "Inisial": "YZ",
+        "Name": "Yoga Zulkarnain",
+        "Imported Name": ""
+      },
+      {
+        "No": 26,
+        "Inisial": "AC",
+        "Name": "Adit Cahyono",
+        "Imported Name": ""
+      },
+      {
+        "No": 27,
+        "Inisial": "BD",
+        "Name": "Bella Damayanti",
+        "Imported Name": ""
+      },
+      {
+        "No": 28,
+        "Inisial": "CE",
+        "Name": "Chris Eriawan",
+        "Imported Name": ""
+      },
+      {
+        "No": 29,
+        "Inisial": "DF",
+        "Name": "Dian Fadhil",
+        "Imported Name": ""
+      },
+      {
+        "No": 30,
+        "Inisial": "EG",
+        "Name": "Eko Gunadi",
+        "Imported Name": ""
+      },
+      {
+        "No": 31,
+        "Inisial": "FH",
+        "Name": "Fira Halim",
+        "Imported Name": ""
+      },
+      {
+        "No": 32,
+        "Inisial": "GI",
+        "Name": "Galih Iskandar",
+        "Imported Name": ""
+      },
+      {
+        "No": 33,
+        "Inisial": "HJ",
+        "Name": "Hendra Joko",
+        "Imported Name": ""
+      },
+      {
+        "No": 34,
+        "Inisial": "IK",
+        "Name": "Intan Kartika",
+        "Imported Name": ""
+      },
+      {
+        "No": 35,
+        "Inisial": "JL",
+        "Name": "Joni Lukman",
+        "Imported Name": ""
+      },
+      {
+        "No": 36,
+        "Inisial": "KM",
+        "Name": "Karin Mulyadi",
+        "Imported Name": ""
+      },
+      {
+        "No": 37,
+        "Inisial": "LN",
+        "Name": "Lukas Nathan",
+        "Imported Name": ""
+      },
+      {
+        "No": 38,
+        "Inisial": "MO",
+        "Name": "Mira Oktora",
+        "Imported Name": ""
+      },
+      {
+        "No": 39,
+        "Inisial": "NP",
+        "Name": "Nanda Putra",
+        "Imported Name": ""
+      },
+      {
+        "No": 40,
+        "Inisial": "OQ",
+        "Name": "Omar Qadri",
+        "Imported Name": ""
       }
     ]
   }

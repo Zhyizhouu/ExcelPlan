@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ApiError,
   fetchCsv,
+  fetchWorkbookStatus,
+  replaceWorkbook,
   saveWorkbook,
   workbookUrl,
   type SavedWorkbook,
+  type WorkbookStatus,
 } from "../api/progress";
 import { Button } from "./ui";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 type Status = { kind: "idle" | "ok" | "error"; message?: string };
 
@@ -32,11 +36,53 @@ type Status = { kind: "idle" | "ok" | "error"; message?: string };
  * button that silently succeeds is indistinguishable from one that silently
  * failed.
  */
-export function ExportBar({ slug }: { slug: string }) {
+export function ExportBar({
+  slug,
+  checkerNeedsAnswerSheet = false,
+}: {
+  slug: string;
+  /** False for cases done on the Data sheet, or not checked at all, where an
+   *  old-template workbook still works and replacing it is optional. */
+  checkerNeedsAnswerSheet?: boolean;
+}) {
   const [copy, setCopy] = useState<Status>({ kind: "idle" });
   const [save, setSave] = useState<Status>({ kind: "idle" });
   /** Which of the two vault buttons is mid-flight, so only that one says so. */
   const [busy, setBusy] = useState<"open" | "save" | null>(null);
+  const [workbook, setWorkbook] = useState<WorkbookStatus | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [replacing, setReplacing] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setWorkbook(null);
+    // A failed check only hides the old-template banner; the buttons still work.
+    fetchWorkbookStatus(slug)
+      .then((s) => !cancelled && setWorkbook(s))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const closeConfirm = useCallback(() => setConfirming(false), []);
+
+  async function onReplace() {
+    setReplacing(true);
+    try {
+      const result = await replaceWorkbook(slug);
+      setWorkbook({ exists: true, outdated: false, path: result.path });
+      setSave({
+        kind: "ok",
+        message: `Replaced. The old workbook is in the Recycle Bin, and ${result.path} now has an Answer sheet.`,
+      });
+    } catch (err) {
+      setSave({ kind: "error", message: err instanceof ApiError ? err.message : String(err) });
+    } finally {
+      setReplacing(false);
+      setConfirming(false);
+    }
+  }
 
   async function onCopy() {
     setCopy({ kind: "idle" });
@@ -73,6 +119,40 @@ export function ExportBar({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-2">
+      {workbook?.outdated && (
+        <div role="status" className="rounded-lg border border-warning/40 p-3">
+          <p className="text-sm text-ink">
+            This case&apos;s workbook uses the old template, with no Answer sheet.
+          </p>
+          <p className="mt-1 text-xs text-ink-muted">
+            {checkerNeedsAnswerSheet
+              ? "The checker needs the new one. Replacing it moves the old file to the Recycle Bin and writes a fresh workbook in its place."
+              : "This case does not need it, so replace only if you want the new layout. Replacing moves the old file, and your work in it, to the Recycle Bin."}
+          </p>
+          <Button variant="secondary" className="mt-2" onClick={() => setConfirming(true)}>
+            Replace with new template
+          </Button>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={confirming}
+        title="Replace this workbook?"
+        confirmLabel="Move to Recycle Bin and replace"
+        busy={replacing}
+        onConfirm={() => void onReplace()}
+        onCancel={closeConfirm}
+      >
+        <p>
+          <span className="font-mono text-xs text-ink">{fileName(workbook?.path)}</span> will be
+          moved to the Recycle Bin, and a fresh workbook with an Answer sheet will take its place.
+        </p>
+        <p>
+          Anything you typed into the old workbook will no longer be in the vault. Close it in
+          Excel before replacing.
+        </p>
+      </ConfirmDialog>
+
       <div className="flex flex-wrap gap-2">
         {/*
           Labelled for what it does rather than how: on a case you have already
@@ -144,6 +224,10 @@ function saveMessage(result: SavedWorkbook, wantedOpen: boolean): string {
   if (!wantedOpen) return `${where}.`;
   if (result.opened) return `${where}. Opening in Excel…`;
   return `${where}. Excel didn't open on its own — open it from the vault folder.`;
+}
+
+function fileName(path?: string): string {
+  return path?.split(/[\\/]/).pop() ?? "The workbook";
 }
 
 function Note({ status }: { status: Status }) {

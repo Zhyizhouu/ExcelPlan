@@ -15,6 +15,13 @@ import (
 	"github.com/Zhyizhouu/excelplan/internal/workbook"
 )
 
+// workbookPath is where a case's workbook lives: beside its note. Derived from
+// the note's own path rather than rebuilt from a phase number, which would
+// guess wrong on the merged "2-3" folder.
+func workbookPath(note vault.Note) string {
+	return filepath.Join(filepath.Dir(note.Path), workbook.Filename(note))
+}
+
 // caseWorkbook assembles the pieces a case's exports need.
 func (s *Server) caseWorkbook(slug string) (vault.Note, datasets.Example, *datasets.Table, error) {
 	note, err := vault.FindBySlug(s.vaultRoot, slug)
@@ -115,10 +122,7 @@ func (s *Server) handleSaveWorkbook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Alongside the case note, so the workbook sits next to the brief it
-	// belongs to. Derived from the note's own path rather than rebuilt from a
-	// phase number, which would guess wrong on the merged "2-3" folder.
-	dest := filepath.Join(filepath.Dir(note.Path), workbook.Filename(note))
+	dest := workbookPath(note)
 
 	var (
 		size    int64

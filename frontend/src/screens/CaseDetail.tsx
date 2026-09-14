@@ -3,6 +3,10 @@ import { ApiError, fetchNote, type NoteDetail } from "../api/progress";
 import { Button, Card, Skeleton } from "../components/ui";
 import { SheetTable } from "../components/SheetTable";
 import { ExportBar } from "../components/ExportBar";
+import { TutorPanel } from "../components/TutorPanel";
+import { JudgePanel } from "../components/JudgePanel";
+
+type Pane = "case" | "tutor";
 
 /**
  * One case, in full: what it asks, the data it works against, and what the
@@ -32,11 +36,13 @@ export function CaseDetail({
 }) {
   const [detail, setDetail] = useState<NoteDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pane, setPane] = useState<Pane>("case");
 
   useEffect(() => {
     let cancelled = false;
     setDetail(null);
     setError(null);
+    setPane("case"); // a new case opens on the brief, never mid-conversation
 
     fetchNote(slug)
       .then((d) => !cancelled && setDetail(d))
@@ -71,7 +77,7 @@ export function CaseDetail({
     );
   }
 
-  const { note, example, dataset } = detail;
+  const { note } = detail;
   const title = (note.Heading || note.Title || note.Slug).replace(
     new RegExp(`^${note.Slug}\\s*[-–—]\\s*`),
     "",
@@ -116,6 +122,53 @@ export function CaseDetail({
         )}
       </header>
 
+      {/*
+        Two panes rather than the tutor stacked under the brief. The brief is
+        read once and the conversation runs long, so one page would mean
+        scrolling past the case every time you asked something — and the tutor
+        is wanted precisely when you are mid-attempt.
+      */}
+      <div className="flex gap-1 border-b border-line" role="tablist">
+        {(["case", "tutor"] as const).map((p) => (
+          <button
+            key={p}
+            type="button"
+            role="tab"
+            aria-selected={pane === p}
+            onClick={() => setPane(p)}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm transition-colors
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                pane === p
+                  ? "border-accent font-medium text-ink"
+                  : "border-transparent text-ink-muted hover:text-ink"
+              }`}
+          >
+            {p === "case" ? "The case" : "Tutor"}
+          </button>
+        ))}
+      </div>
+
+      {pane === "tutor" ? (
+        <TutorPanel slug={slug} />
+      ) : (
+        <CaseBody slug={slug} detail={detail} />
+      )}
+    </article>
+  );
+}
+
+/**
+ * The brief itself: the note's own fields, then the worked example if the case
+ * has one.
+ *
+ * Its own component so the tab switch above is one line rather than a wrapper
+ * around eighty, and so the two panes read as the alternatives they are.
+ */
+function CaseBody({ slug, detail }: { slug: string; detail: NoteDetail }) {
+  const { note, example, dataset } = detail;
+
+  return (
+    <div className="space-y-7">
       {/* The case as written in the vault. */}
       {note.Fields && note.Fields.length > 0 && (
         <Card>
@@ -139,6 +192,44 @@ export function CaseDetail({
           <section>
             <h2 className="mb-1 text-lg font-semibold text-ink">The task</h2>
             <p className="text-sm leading-relaxed text-ink-muted">{example.task}</p>
+
+            {/*
+              Named up front, not buried in the task text. A case whose stated
+              objective the answer never actually needs is one you can finish
+              without learning the thing it was written for — and the sheet
+              looks the same either way, so nothing tells you.
+            */}
+            {example.requires && example.requires.length > 0 && (
+              <p className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+                <span className="font-semibold uppercase tracking-wide">
+                  Must use
+                </span>
+                {example.requires.map((r) => (
+                  <span
+                    key={r}
+                    className="rounded-full border border-accent/40 bg-accent-soft px-2.5
+                      py-0.5 font-mono text-accent"
+                  >
+                    {r}
+                  </span>
+                ))}
+              </p>
+            )}
+
+            {example.controls && example.controls.length > 0 && (
+              <div className="mt-3 rounded-lg border border-line bg-surface p-4">
+                {example.controls.map((c) => (
+                  <div key={c.cell}>
+                    <p className="text-sm text-ink">
+                      <span className="font-mono text-xs text-ink-muted">{c.cell}</span>{" "}
+                      <span className="font-medium">{c.label}</span> ={" "}
+                      <span className="font-mono">{c.value}</span>
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-ink-muted">{c.note}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {dataset && (
@@ -152,7 +243,12 @@ export function CaseDetail({
                 highlight={example.inputColumns}
               />
               <div className="mt-4">
-                <ExportBar slug={slug} />
+                <ExportBar
+                  slug={slug}
+                  checkerNeedsAnswerSheet={
+                    note.Week !== 1 && !example.reference && example.workOn !== "data"
+                  }
+                />
               </div>
             </section>
           )}
@@ -162,6 +258,11 @@ export function CaseDetail({
             <p className="mb-3 text-sm text-ink-muted">{example.resultNote}</p>
             <SheetTable data={example.result} caption="What your sheet should show" />
           </section>
+
+          {/* Week 1 is practice, and reference examples cannot be compared. */}
+          {note.Week !== 1 && !example.reference && (
+            <JudgePanel slug={slug} workOnData={example.workOn === "data"} />
+          )}
 
           {example.formula && (
             <section>
@@ -180,15 +281,24 @@ export function CaseDetail({
          * Said plainly rather than hidden. A page that just stops after the
          * note fields reads like something failed to load; naming the gap
          * makes it obviously a gap in the content, not in the app.
+         *
+         * The count comes from the server rather than being written here. This
+         * card used to name the phases it believed were covered, and that claim
+         * went stale the day the weekly-build cases landed inside two of them —
+         * a sentence asserting a fact that nothing was checking.
          */
         <Card className="border-dashed">
           <p className="text-sm text-ink-muted">
             No worked example for this case yet — the note above is the whole
-            brief. Worked examples currently cover Phase 0 and Week 2.
+            brief.{" "}
+            {detail.exampleCount
+              ? `${detail.exampleCount} cases have one so far; writing them is hand work, and a wrong one would be worse than none.`
+              : "Writing them is hand work, and a wrong one would be worse than none."}{" "}
+            The Tutor tab can still talk you through this one.
           </p>
         </Card>
       )}
-    </article>
+    </div>
   );
 }
 

@@ -6,5 +6,18 @@ dist/
 progress-log.json
 backend/excelplan-api.exe
 
+# Desktop app: frontend_dist is copied from frontend/dist before `wails build`
+# (see build-desktop.bat). build/appicon.png and build/windows/* are the real
+# app icon + manifest and are committed on purpose; only the compiled exe
+# under build/bin/ is disposable.
+backend/cmd/desktop/frontend_dist/
+backend/cmd/desktop/build/bin/
+
 # Answer workbooks live in the vault, not here.
 *.xlsx
+
+# API keys and local config. Never commit .env — .env.example documents it.
+.env
+backend/.env
+tutor-log.json
+tutor-log.json.tmp

@@ -176,8 +176,8 @@ func TestReadAll_RealVault(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(notes) != 110 {
-		t.Fatalf("got %d notes, want 110 (the vault's own stated total)", len(notes))
+	if len(notes) != 127 {
+		t.Fatalf("got %d notes, want 127 (the vault's own stated total)", len(notes))
 	}
 
 	// Sorted by phase order, then week, then slug — the order the plan is
@@ -201,8 +201,8 @@ func TestReadAll_RealVault(t *testing.T) {
 			merged++
 		}
 	}
-	if merged != 25 {
-		t.Fatalf("got %d notes in the merged 2-3 phase, want 25", merged)
+	if merged != 29 {
+		t.Fatalf("got %d notes in the merged 2-3 phase, want 29", merged)
 	}
 
 	slugs := make(map[string]bool, len(notes))
@@ -256,8 +256,8 @@ func TestRoll_RealVault(t *testing.T) {
 	}
 
 	got := Roll(notes, headers)
-	if got.Total != 110 {
-		t.Fatalf("total = %d, want 110", got.Total)
+	if got.Total != 127 {
+		t.Fatalf("total = %d, want 127", got.Total)
 	}
 	if len(got.Phases) != 8 { // 9 headers, but 2 and 3 merge into one key
 		t.Fatalf("got %d phases, want 8 (2-3 is one folder)", len(got.Phases))

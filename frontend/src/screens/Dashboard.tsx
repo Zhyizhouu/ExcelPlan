@@ -18,7 +18,7 @@ import { useSession } from "../app/session";
  * The dashboard answers one question first — what do I do today — and only
  * then shows how far along everything is.
  *
- * Ordering is the whole design. A grid of 110 cases is a decision to make
+ * Ordering is the whole design. A grid of 127 cases is a decision to make
  * before any work starts, and deciding is the step people skip a day over.
  * The next case is therefore the largest thing on the screen, already chosen.
  */
@@ -74,8 +74,8 @@ export function Dashboard({
           {name ? `Welcome back, ${name}` : "Your plan"}
         </h1>
         <p className="mt-1 text-sm text-ink-muted">
-          Excel Mastery — {progress.total} cases, five a week, from calibration to
-          the ops capstone.
+          Excel Mastery — {progress.total} cases: five short ones a week plus a
+          weekly build, from calibration to the ops capstone.
         </p>
       </header>
 
@@ -119,7 +119,9 @@ export function Dashboard({
         </Card>
       ) : (
         <Card className="border-accent/40 bg-accent-soft">
-          <h2 className="font-serif text-2xl text-accent">All 110 cases complete.</h2>
+          <h2 className="font-serif text-2xl text-accent">
+            All {progress.total} cases complete.
+          </h2>
           <p className="mt-1 text-sm text-ink-muted">
             The whole roadmap, start to finish.
           </p>

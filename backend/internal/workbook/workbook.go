@@ -1,9 +1,10 @@
 // Package workbook builds the .xlsx a case is worked in.
 //
-// Three sheets: the brief, the data, and the expected result. The expected
-// result gets its own sheet rather than sitting beside the data, so opening
-// the file does not hand over the answer before the work starts — it is there
-// to check against, one tab away, which is a different thing from being shown.
+// Four sheets: the brief, the data, a blank Answer sheet, and the expected
+// result. The student builds their own table on Answer, which is where the
+// judge looks for it. The expected result gets its own sheet rather than
+// sitting beside the data, so opening the file does not hand over the answer
+// before the work starts.
 //
 // The Data sheet is a plain styled range and deliberately *not* an Excel
 // Table. W2D1's entire exercise is converting a range to a Table with Ctrl+T;
@@ -24,7 +25,16 @@ import (
 const (
 	sheetBrief    = "Brief"
 	sheetData     = "Data"
+	sheetAnswer   = "Answer"
 	sheetExpected = "Expected"
+)
+
+// Sheet names the judge reads.
+const (
+	SheetBrief    = sheetBrief
+	SheetData     = sheetData
+	SheetAnswer   = sheetAnswer
+	SheetExpected = sheetExpected
 )
 
 // Build renders a case into a workbook.
@@ -80,6 +90,13 @@ func Build(note vault.Note, example datasets.Example, table *datasets.Table) ([]
 	if err := writeTable(f, sheetData, cols, rows, header); err != nil {
 		return nil, err
 	}
+	if err := writeControls(f, example, label); err != nil {
+		return nil, err
+	}
+	// Deliberately blank: the layout is part of the work.
+	if _, err := f.NewSheet(sheetAnswer); err != nil {
+		return nil, err
+	}
 	if err := writeTable(f, sheetExpected,
 		example.Result.Columns, example.Result.Rows, header); err != nil {
 		return nil, err
@@ -118,6 +135,14 @@ func writeBrief(
 	if example.Task != "" {
 		rows = append(rows, [2]string{"", ""}, [2]string{"Task", example.Task})
 	}
+	if len(example.Result.Columns) > 0 {
+		rows = append(rows, [2]string{"Work on", workOn(example)})
+		// The exact names the judge searches for, so nobody has to open
+		// Expected to learn what to call a column.
+		if example.Judged() {
+			rows = append(rows, [2]string{"Headers", strings.Join(example.Result.Columns, ", ")})
+		}
+	}
 	if example.Formula != "" {
 		// Prefixed with an apostrophe so Excel stores it as text. Without it a
 		// cell beginning "=" is parsed as a formula and shows #NAME? instead of
@@ -145,7 +170,79 @@ func writeBrief(
 	return nil
 }
 
-// writeTable lays a table out with a styled, frozen header row.
+// HasAnswerSheet reports whether a saved workbook was built with the Answer
+// sheet. Only workbooks made before it existed may be replaced.
+func HasAnswerSheet(data []byte) (bool, error) {
+	f, err := excelize.OpenReader(bytes.NewReader(data))
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+	idx, err := f.GetSheetIndex(sheetAnswer)
+	return err == nil && idx >= 0, nil
+}
+
+func workOn(example datasets.Example) string {
+	switch {
+	case example.WorkOn == "data":
+		return "The Data sheet itself. The checker reads your work there."
+	case !example.Judged():
+		return "The Answer sheet. This case's example is a reference, so compare " +
+			"your work with the Expected sheet yourself."
+	}
+	return "The Answer sheet. Build your own table there with the headers below, " +
+		"anywhere on the sheet, and save before checking."
+}
+
+// writeControls puts the case's input cells on the Data sheet.
+//
+// Beside the data rather than on the Brief, because the whole point is that the
+// answer reacts to them: a control the student has to switch tabs to change is
+// one they will forget is driving anything. The label goes in the cell to the
+// control's left, so the sheet reads without a legend.
+//
+// Values are written as text, including ones that look numeric. A control is
+// something typed over, and Excel silently reformatting the cell the first time
+// it is edited is a distraction from the case.
+func writeControls(f *excelize.File, example datasets.Example, label int) error {
+	for _, c := range example.Controls {
+		col, row, err := excelize.CellNameToCoordinates(c.Cell)
+		if err != nil {
+			return fmt.Errorf("control cell %q: %w", c.Cell, err)
+		}
+		if col < 2 {
+			// The label would land in column zero. Caught here rather than
+			// silently dropping the label.
+			return fmt.Errorf("control cell %q must be in column B or later", c.Cell)
+		}
+
+		labelCell, err := excelize.CoordinatesToCellName(col-1, row)
+		if err != nil {
+			return err
+		}
+		if err := f.SetCellStr(sheetData, labelCell, c.Label); err != nil {
+			return err
+		}
+		if err := f.SetCellStr(sheetData, c.Cell, c.Value); err != nil {
+			return err
+		}
+		_ = f.SetCellStyle(sheetData, labelCell, labelCell, label)
+
+		if c.Note != "" {
+			// A comment rather than another cell: the note explains the control
+			// without competing with it for space next to the data.
+			_ = f.AddComment(sheetData, excelize.Comment{
+				Cell:   c.Cell,
+				Author: "ExcelPlan",
+				Paragraph: []excelize.RichTextRun{
+					{Text: c.Note},
+				},
+			})
+		}
+	}
+	return nil
+}
+
 func writeTable(
 	f *excelize.File, sheet string, columns []string, rows []map[string]any, header int,
 ) error {

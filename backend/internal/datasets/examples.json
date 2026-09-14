@@ -161,8 +161,8 @@
         }
       ]
     },
-    "resultNote": "Identical to the source \u2014 the exercise is the keyboard, not the answer.",
-    "formula": "Ctrl+\u2192  Ctrl+Shift+\u2193  F2  Ctrl+;  F4"
+    "resultNote": "Identical to the source — the exercise is the keyboard, not the answer.",
+    "formula": "Ctrl+→  Ctrl+Shift+↓  F2  Ctrl+;  F4"
   },
   "W1D2": {
     "dataset": "teaching",
@@ -236,7 +236,7 @@
       "Workload"
     ],
     "inputNote": "Only the Workload column decides the band.",
-    "task": "Classify each session light / standard / heavy, first with nested IF, then with IFS.",
+    "task": "Classify each session light / standard / heavy, first with nested IF, then with IFS. Both cutoffs live in cells, so changing one has to re-band every row on its own.",
     "result": {
       "columns": [
         "No",
@@ -320,7 +320,24 @@
       ]
     },
     "resultNote": "IFS reads top to bottom and stops at the first TRUE, so order the tests narrowest first.",
-    "formula": "=IFS([@Workload]<1.5,\"light\",[@Workload]<2.5,\"standard\",TRUE,\"heavy\")"
+    "formula": "=IFS([@Workload]<$F$1,\"light\",[@Workload]<$F$2,\"standard\",TRUE,\"heavy\")",
+    "requires": [
+      "IFS"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Light below",
+        "value": "1.5",
+        "note": "Change this to 1.0 and every Band must re-read. A typed-in column will not."
+      },
+      {
+        "cell": "F2",
+        "label": "Heavy at or above",
+        "value": "2.5",
+        "note": "The second cutoff. Both belong in cells, not buried in the formula."
+      }
+    ]
   },
   "W1D4": {
     "dataset": "teaching",
@@ -330,7 +347,7 @@
       "Workload"
     ],
     "inputNote": "Three columns are enough: Group to bucket by, Lecturer Type to filter, Workload to add up.",
-    "task": "Per Group: session count, total workload, VC count, and average workload.",
+    "task": "Per Group: session count, total workload, a count of one lecturer type, and average workload. Which type gets counted comes from a cell, not from the formula.",
     "result": {
       "columns": [
         "Group",
@@ -378,7 +395,19 @@
       ]
     },
     "resultNote": "Check it: the Sessions column must sum to 41, the row count of the source.",
-    "formula": "=COUNTIFS(Group,$A2)   =SUMIFS(Workload,Group,$A2)   =COUNTIFS(Group,$A2,Type,\"VC\")"
+    "formula": "=COUNTIFS(Group,$A2)   =SUMIFS(Workload,Group,$A2)   =COUNTIFS(Group,$A2,Type,$G$1)",
+    "requires": [
+      "COUNTIFS",
+      "SUMIFS"
+    ],
+    "controls": [
+      {
+        "cell": "G1",
+        "label": "Count which lecturer type",
+        "value": "VC",
+        "note": "Switch this to Forum and the fourth column must follow without editing a formula."
+      }
+    ]
   },
   "W1D5": {
     "dataset": "teaching",
@@ -386,58 +415,132 @@
       "Ast",
       "Course Name"
     ],
-    "inputNote": "The Ast column repeats \u2014 41 sessions across 21 people.",
-    "task": "Build a deduplicated, sorted assistant roster that updates itself when rows are added.",
+    "inputNote": "The Ast column repeats — 41 sessions across 21 people.",
+    "task": "Build a roster that dedupes and sorts itself, then a search cell that looks one assistant up. Typing a different code into the search cell must change the answer beside it — so the roster has to come from UNIQUE and SORT, and the lookup from XLOOKUP. Nothing typed by hand survives changing that cell.",
     "result": {
       "columns": [
-        "Ast",
-        "Sessions"
+        "Ast"
       ],
       "rows": [
         {
-          "Ast": "AB",
-          "Sessions": 2
+          "Ast": "AB"
         },
         {
-          "Ast": "BC",
-          "Sessions": 2
+          "Ast": "BC"
         },
         {
-          "Ast": "CD",
-          "Sessions": 2
+          "Ast": "CD"
         },
         {
-          "Ast": "DE",
-          "Sessions": 2
+          "Ast": "DE"
         },
         {
-          "Ast": "EF",
-          "Sessions": 2
+          "Ast": "EF"
         },
         {
-          "Ast": "FG",
-          "Sessions": 2
+          "Ast": "FG"
         },
         {
-          "Ast": "GH",
-          "Sessions": 2
+          "Ast": "GH"
         },
         {
-          "Ast": "HI",
-          "Sessions": 2
+          "Ast": "HI"
         },
         {
-          "Ast": "IJ",
-          "Sessions": 2
+          "Ast": "IJ"
         },
         {
-          "Ast": "JK",
-          "Sessions": 2
+          "Ast": "JK"
         }
       ]
     },
-    "resultNote": "Spilled, not dragged: one formula in one cell produces every row. Showing the first 10 of 21.",
-    "formula": "=SORT(UNIQUE(tblTeaching[Ast]))"
+    "resultNote": "Spilled, not dragged: one formula in one cell produces all 21 rows — the first 10 are shown. With HI in the search cell the lookup returns “Mobile Development”; with ZZ it must read “Not on the roster” rather than #N/A.",
+    "formula": "=SORT(UNIQUE(tblTeaching[Ast]))\n=XLOOKUP($E$1, tblTeaching[Ast], tblTeaching[Course Name], \"Not on the roster\")",
+    "requires": [
+      "UNIQUE",
+      "SORT",
+      "XLOOKUP"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Search: assistant code",
+        "value": "HI",
+        "note": "Change this and the lookup beside it must follow on its own. Try ZZ, which is not on the roster — that is what XLOOKUP's if_not_found argument is for."
+      }
+    ]
+  },
+  "W1D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Course Name",
+      "Workload"
+    ],
+    "inputNote": "Every session with its assistant, course and workload.",
+    "task": "Build one card that answers everything about an assistant from a code typed into a single cell: sessions with COUNTIFS, total workload with SUMIFS, their first course with XLOOKUP, a band with IFS, and a strip of workload at 1.25x, 1.5x and 2x from one mixed-reference formula. Put a roster list beside it with SORT and UNIQUE, so the code has something to be checked against.",
+    "requires": [
+      "SORT",
+      "UNIQUE",
+      "COUNTIFS",
+      "SUMIFS",
+      "XLOOKUP",
+      "IFS"
+    ],
+    "controls": [
+      {
+        "cell": "G1",
+        "label": "Assistant code",
+        "value": "AB",
+        "note": "Type CD, then ZZ. Every field on the card must follow this one cell."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Code",
+        "Sessions",
+        "Total Workload",
+        "First course",
+        "Band",
+        "x1.25",
+        "x1.5",
+        "x2"
+      ],
+      "rows": [
+        {
+          "Code": "AB",
+          "Sessions": 2.0,
+          "Total Workload": 5.0,
+          "First course": "Algorithm and Programming",
+          "Band": "heavy",
+          "x1.25": 6.25,
+          "x1.5": 7.5,
+          "x2": 10.0
+        },
+        {
+          "Code": "CD",
+          "Sessions": 2.0,
+          "Total Workload": 2.0,
+          "First course": "Database Systems",
+          "Band": "light",
+          "x1.25": 2.5,
+          "x1.5": 3.0,
+          "x2": 4.0
+        },
+        {
+          "Code": "ZZ",
+          "Sessions": 0.0,
+          "Total Workload": 0.0,
+          "First course": "not on roster",
+          "Band": "not on roster",
+          "x1.25": 0.0,
+          "x1.5": 0.0,
+          "x2": 0.0
+        }
+      ]
+    },
+    "resultNote": "The card for three codes. AB teaches 2 sessions, 5.0 in total, and is heavy (light is under 3, standard under 4.5). CD is light at 2.0. ZZ is not on the roster, and the card says so instead of showing #N/A, which is the stretch.",
+    "formula": "=SORT(UNIQUE(Data!A2:A42))\n=COUNTIFS(Data!$A$2:$A$42, Data!$G$1)\n=SUMIFS(Data!$C$2:$C$42, Data!$A$2:$A$42, Data!$G$1)\n=XLOOKUP(Data!$G$1, Data!$A$2:$A$42, Data!$B$2:$B$42, \"not on roster\")\n=IF(B2=0, \"not on roster\", IFS(C2<3, \"light\", C2<4.5, \"standard\", TRUE, \"heavy\"))\n=$C2*F$1"
   },
   "W2D1": {
     "dataset": "teaching",
@@ -446,7 +549,7 @@
       "Workload"
     ],
     "inputNote": "Convert the range to a Table first (Ctrl+T), then name it tblTeaching.",
-    "task": "Rewrite a SUMIFS using structured references instead of A1-style ranges.",
+    "task": "Rewrite a SUMIFS using structured references instead of A1-style ranges, with the criteria read from the row label rather than typed in. Then add a row to the Table: the totals must move without you touching the formula. That is the whole point of the Table, and a hardcoded range will not do it.",
     "result": {
       "columns": [
         "Lecturer Type",
@@ -464,7 +567,20 @@
       ]
     },
     "resultNote": "The formula stops mentioning cell addresses, so adding rows never breaks it.",
-    "formula": "=SUMIFS(tblTeaching[Workload], tblTeaching[Lecturer Type], \"VC\")"
+    "formula": "=SUMIFS(tblTeaching[Workload], tblTeaching[Lecturer Type], $A2)",
+    "requires": [
+      "SUMIFS",
+      "structured references"
+    ],
+    "computed": [
+      "Total Workload"
+    ],
+    "sortedBy": [
+      "-Total Workload"
+    ],
+    "checks": [
+      "table"
+    ]
   },
   "W2D2": {
     "dataset": "teaching",
@@ -499,14 +615,19 @@
         }
       ]
     },
-    "resultNote": "Note the trap: real Workload values reach 2.5, so this rule rejects most of the sheet. That is the lesson \u2014 validation constrains new input, it does not clean existing data.",
-    "formula": "Data \u2192 Data Validation \u2192 Allow: List / Decimal"
+    "resultNote": "Note the trap: real Workload values reach 2.5, so this rule rejects most of the sheet. That is the lesson — validation constrains new input, it does not clean existing data.",
+    "formula": "Data → Data Validation → Allow: List / Decimal",
+    "workOn": "data",
+    "checks": [
+      "validation"
+    ]
   },
   "W2D3": {
     "dataset": "teaching",
     "inputColumns": [
       "Group",
       "Course Name",
+      "Ast",
       "Lecturer Type",
       "Workload"
     ],
@@ -538,15 +659,20 @@
       ]
     },
     "resultNote": "2 rows survive both conditions. A filter hides rows, it does not delete them.",
-    "formula": "Data \u2192 Sort  \u00b7  Data \u2192 Filter"
+    "formula": "Data → Sort  ·  Data → Filter",
+    "workOn": "data",
+    "sortedBy": [
+      "Group",
+      "-Workload"
+    ]
   },
   "W2D4": {
     "dataset": "teaching",
     "inputColumns": [
       "Course ID"
     ],
-    "inputNote": "COMP6047001 \u2014 four letters, four digits, then the section.",
-    "task": "Split Course ID into department code, number and section digits.",
+    "inputNote": "COMP6047001 — four letters, four digits, then the section.",
+    "task": "Split Course ID into department code, number and section digits — with the length of the department code read from a cell, so all three parts follow when it changes.",
     "result": {
       "columns": [
         "Course ID",
@@ -605,16 +731,36 @@
         }
       ]
     },
-    "resultNote": "RIGHT needs LEN because the section length is not fixed \u2014 hard-coding 3 breaks on the first exception.",
-    "formula": "=LEFT(A2,4)   =MID(A2,5,4)   =RIGHT(A2,LEN(A2)-8)"
+    "resultNote": "RIGHT needs LEN because the section length is not fixed — hard-coding 3 breaks on the first exception.",
+    "formula": "=LEFT(A2,$F$1)   =MID(A2,$F$1+1,4)   =RIGHT(A2,LEN(A2)-$F$1-4)",
+    "requires": [
+      "LEFT",
+      "MID",
+      "RIGHT",
+      "LEN"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Dept code length",
+        "value": "4",
+        "note": "Set this to 3 and all three parts must shift. Typed-in values will not move."
+      }
+    ],
+    "computed": [
+      "Dept",
+      "Number",
+      "Section"
+    ],
+    "sample": true
   },
   "W2D5": {
     "dataset": "teaching",
     "inputColumns": [
       "Course Name"
     ],
-    "inputNote": "SEARCH returns a position on a hit and #VALUE! on a miss \u2014 the error is the signal.",
-    "task": "Flag every course whose name contains \"Database\", blank otherwise.",
+    "inputNote": "SEARCH returns a position on a hit and #VALUE! on a miss — the error is the signal.",
+    "task": "Flag every course whose name contains the search term, blank otherwise. The term lives in a cell, so changing it has to re-flag the whole column.",
     "result": {
       "columns": [
         "Course Name",
@@ -675,6 +821,3436 @@
       ]
     },
     "resultNote": "Without IFERROR the column fills with #VALUE!, which is correct and unreadable. Wrapping it turns a miss into a blank.",
-    "formula": "=IFERROR(IF(SEARCH(\"Database\",A2)>0,TRUE,\"\"),\"\")"
+    "formula": "=IFERROR(IF(SEARCH($E$1,A2)>0,TRUE,\"\"),\"\")",
+    "requires": [
+      "SEARCH",
+      "IFERROR"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Search for",
+        "value": "Database",
+        "note": "Type Programming instead and the flags must move to different rows. Eyeballing will not survive it."
+      }
+    ],
+    "computed": [
+      "Position",
+      "Flag"
+    ],
+    "sample": true
+  },
+  "W2D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Course ID",
+      "Course Name",
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Convert this range to a Table first. Everything you add becomes a Table column.",
+    "task": "Turn the Data sheet into a Table that runs itself: dropdowns on Group and Lecturer Type, a numeric rule on Workload, Dept, Number and Section parsed out of Course ID, and a Flag column that marks courses containing the keyword in L1, with SEARCH inside IFERROR. Then type a new row under the last one and check every column fills itself in.",
+    "requires": [
+      "LEFT",
+      "MID",
+      "RIGHT",
+      "SEARCH",
+      "IFERROR",
+      "structured references"
+    ],
+    "controls": [
+      {
+        "cell": "L1",
+        "label": "Keyword",
+        "value": "Data",
+        "note": "Change it to Web and the Flag column must follow without touching a formula."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Course ID",
+        "Course Name",
+        "Dept",
+        "Number",
+        "Section",
+        "Flag"
+      ],
+      "rows": [
+        {
+          "Course ID": "COMP6047001",
+          "Course Name": "Algorithm and Programming",
+          "Dept": "COMP",
+          "Number": "6047",
+          "Section": "001",
+          "Flag": ""
+        },
+        {
+          "Course ID": "COMP6048002",
+          "Course Name": "Data Structures",
+          "Dept": "COMP",
+          "Number": "6048",
+          "Section": "002",
+          "Flag": true
+        },
+        {
+          "Course ID": "COMP6049003",
+          "Course Name": "Database Systems",
+          "Dept": "COMP",
+          "Number": "6049",
+          "Section": "003",
+          "Flag": true
+        },
+        {
+          "Course ID": "COMP6050004",
+          "Course Name": "Operating Systems",
+          "Dept": "COMP",
+          "Number": "6050",
+          "Section": "004",
+          "Flag": ""
+        },
+        {
+          "Course ID": "COMP6051005",
+          "Course Name": "Computer Networks",
+          "Dept": "COMP",
+          "Number": "6051",
+          "Section": "005",
+          "Flag": ""
+        },
+        {
+          "Course ID": "COMP6052006",
+          "Course Name": "Software Engineering",
+          "Dept": "COMP",
+          "Number": "6052",
+          "Section": "006",
+          "Flag": ""
+        },
+        {
+          "Course ID": "COMP6053007",
+          "Course Name": "Web Programming",
+          "Dept": "COMP",
+          "Number": "6053",
+          "Section": "007",
+          "Flag": ""
+        },
+        {
+          "Course ID": "COMP6054008",
+          "Course Name": "Mobile Development",
+          "Dept": "COMP",
+          "Number": "6054",
+          "Section": "008",
+          "Flag": ""
+        }
+      ]
+    },
+    "resultNote": "The first 8 of 41 rows. Only Data Structures and Database Systems carry the keyword Data. The real deliverable is a count: formula edits needed after adding a row, and the answer should be zero.",
+    "formula": "=LEFT([@[Course ID]], 4)\n=MID([@[Course ID]], 5, 4)\n=RIGHT([@[Course ID]], LEN([@[Course ID]]) - 8)\n=IFERROR(IF(SEARCH($L$1, [@[Course Name]]) > 0, TRUE, \"\"), \"\")",
+    "workOn": "data",
+    "computed": [
+      "Dept",
+      "Number",
+      "Section",
+      "Flag"
+    ],
+    "sample": true,
+    "checks": [
+      "table"
+    ],
+    "notChecked": [
+      "The dropdowns on Group and Lecturer Type, and the numeric rule on Workload.",
+      "Whether a new row fills itself in."
+    ]
+  },
+  "W3D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Course Name",
+      "Class"
+    ],
+    "inputNote": "Three columns that mean nothing apart and read as a label together.",
+    "task": "Build a display label from the three parts, with the separator read from a cell so changing it re-renders every label. Then use TEXTJOIN to collapse all of one assistant's classes into a single comma list.",
+    "requires": [
+      "TEXTJOIN"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Separator",
+        "value": " - ",
+        "note": "Change this to \" | \" and every label must follow. A label typed by hand will not."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Course Name",
+        "Class",
+        "Label"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Course Name": "Algorithm and Programming",
+          "Class": "BA1A",
+          "Label": "AB - Algorithm and Programming - BA1A"
+        },
+        {
+          "Ast": "BC",
+          "Course Name": "Data Structures",
+          "Class": "BA2A",
+          "Label": "BC - Data Structures - BA2A"
+        },
+        {
+          "Ast": "CD",
+          "Course Name": "Database Systems",
+          "Class": "BA3A",
+          "Label": "CD - Database Systems - BA3A"
+        },
+        {
+          "Ast": "DE",
+          "Course Name": "Operating Systems",
+          "Class": "BA4A",
+          "Label": "DE - Operating Systems - BA4A"
+        },
+        {
+          "Ast": "EF",
+          "Course Name": "Computer Networks",
+          "Class": "BA1A",
+          "Label": "EF - Computer Networks - BA1A"
+        },
+        {
+          "Ast": "FG",
+          "Course Name": "Software Engineering",
+          "Class": "BA2A",
+          "Label": "FG - Software Engineering - BA2A"
+        },
+        {
+          "Ast": "GH",
+          "Course Name": "Web Programming",
+          "Class": "BA3A",
+          "Label": "GH - Web Programming - BA3A"
+        },
+        {
+          "Ast": "HI",
+          "Course Name": "Mobile Development",
+          "Class": "BA4A",
+          "Label": "HI - Mobile Development - BA4A"
+        }
+      ]
+    },
+    "resultNote": "The first 8 of 41 labels. TEXTJOIN over the same table gives AB's classes as “BA1A, BA2A” — one cell, not one per session.",
+    "formula": "=A2 & $F1 & B2 & $F1 & C2\n=TEXTJOIN(\", \", TRUE, IF(tblTeaching[Ast]=$A2, tblTeaching[Class], \"\"))",
+    "computed": [
+      "Label"
+    ],
+    "sample": true
+  },
+  "W3D2": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Name"
+    ],
+    "inputNote": "The roster's names, as they actually arrive.",
+    "task": "Run PROPER over TRIM on every name and compare the result with the original. Where they differ, the source was dirty; where they match, you have proved it clean rather than assumed it. Then paste a deliberately messy value into the control cell and watch the same formula fix it.",
+    "requires": [
+      "PROPER",
+      "TRIM"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Paste a messy value",
+        "value": "  alfred   ABNER  ",
+        "note": "PROPER(TRIM()) on this must return Alfred Abner. That is the same formula the column runs."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Inisial",
+        "Name",
+        "Cleaned",
+        "Changed"
+      ],
+      "rows": [
+        {
+          "Inisial": "AB",
+          "Name": "Alfred Abner",
+          "Cleaned": "Alfred Abner",
+          "Changed": ""
+        },
+        {
+          "Inisial": "BC",
+          "Name": "Bianca Chandra",
+          "Cleaned": "Bianca Chandra",
+          "Changed": ""
+        },
+        {
+          "Inisial": "CD",
+          "Name": "Cindy Dewi",
+          "Cleaned": "Cindy Dewi",
+          "Changed": ""
+        },
+        {
+          "Inisial": "DE",
+          "Name": "Devan Eka",
+          "Cleaned": "Devan Eka",
+          "Changed": ""
+        },
+        {
+          "Inisial": "EF",
+          "Name": "Erika Fitri",
+          "Cleaned": "Erika Fitri",
+          "Changed": ""
+        },
+        {
+          "Inisial": "FG",
+          "Name": "Farhan Gunawan",
+          "Cleaned": "Farhan Gunawan",
+          "Changed": ""
+        },
+        {
+          "Inisial": "GH",
+          "Name": "Gilang Hakim",
+          "Cleaned": "Gilang Hakim",
+          "Changed": ""
+        },
+        {
+          "Inisial": "HI",
+          "Name": "Hana Indah",
+          "Cleaned": "Hana Indah",
+          "Changed": ""
+        },
+        {
+          "Inisial": "IJ",
+          "Name": "Irfan Jaya",
+          "Cleaned": "Irfan Jaya",
+          "Changed": ""
+        },
+        {
+          "Inisial": "JK",
+          "Name": "Jessica Kurnia",
+          "Cleaned": "Jessica Kurnia",
+          "Changed": ""
+        }
+      ]
+    },
+    "resultNote": "The first 10 of 40. Cleaned matches Name on every row and Changed is blank throughout — 0 of 40 names needed fixing. A cleaning step that changes nothing is a passed check, not wasted work.",
+    "formula": "=PROPER(TRIM(B2))\n=IF(EXACT(PROPER(TRIM(B2)), B2), \"\", \"changed\")",
+    "computed": [
+      "Cleaned",
+      "Changed"
+    ],
+    "sample": true
+  },
+  "W3D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "No",
+      "Time"
+    ],
+    "inputNote": "One column holding two times, separated by a hyphen.",
+    "task": "Split Time into Start and End with Text to Columns, then throw the result away and reproduce it with Flash Fill. Note which one survives new rows being added, because that is the difference that matters.",
+    "result": {
+      "columns": [
+        "No",
+        "Time",
+        "Start",
+        "End"
+      ],
+      "rows": [
+        {
+          "No": 1,
+          "Time": "07.20 - 09.00",
+          "Start": "07.20",
+          "End": "09.00"
+        },
+        {
+          "No": 2,
+          "Time": "09.20 - 11.00",
+          "Start": "09.20",
+          "End": "11.00"
+        },
+        {
+          "No": 3,
+          "Time": "11.20 - 13.00",
+          "Start": "11.20",
+          "End": "13.00"
+        },
+        {
+          "No": 4,
+          "Time": "13.20 - 15.00",
+          "Start": "13.20",
+          "End": "15.00"
+        },
+        {
+          "No": 5,
+          "Time": "15.20 - 17.00",
+          "Start": "15.20",
+          "End": "17.00"
+        },
+        {
+          "No": 6,
+          "Time": "17.20 - 19.00",
+          "Start": "17.20",
+          "End": "19.00"
+        },
+        {
+          "No": 7,
+          "Time": "07.20 - 09.00",
+          "Start": "07.20",
+          "End": "09.00"
+        },
+        {
+          "No": 8,
+          "Time": "09.20 - 11.00",
+          "Start": "09.20",
+          "End": "11.00"
+        }
+      ]
+    },
+    "resultNote": "The first 8 of 41. Both methods produce this; neither updates when a row is added, which is the argument for doing it in Power Query later.",
+    "formula": "Data → Text to Columns → Delimited → Other: -\nCtrl+E for Flash Fill",
+    "workOn": "data",
+    "sample": true
+  },
+  "W3D4": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Name",
+      "Wed"
+    ],
+    "inputNote": "The roster, keyed by initials.",
+    "task": "Look a person up by their initials with INDEX and MATCH — never by counting columns. Then insert a column in the middle of the roster and confirm your formula still returns the same answer. That is the whole reason for this pairing.",
+    "requires": [
+      "INDEX",
+      "MATCH"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Look up which initials",
+        "value": "HI",
+        "note": "Type any code here. Try ZZ, which is not on the roster, and decide what it should say."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Code",
+        "Name",
+        "Wed"
+      ],
+      "rows": [
+        {
+          "Code": "HI",
+          "Name": "Hana Indah",
+          "Wed": "N"
+        },
+        {
+          "Code": "AB",
+          "Name": "Alfred Abner",
+          "Wed": "N"
+        },
+        {
+          "Code": "TU",
+          "Name": "Toni Utama",
+          "Wed": "P"
+        },
+        {
+          "Code": "ZZ",
+          "Name": "not on the roster",
+          "Wed": "not on the roster"
+        }
+      ]
+    },
+    "resultNote": "What the lookup returns for four codes. The last is deliberate: MATCH raises #N/A on a miss, so the case is not finished until that reads as something a person would want to see.",
+    "formula": "=INDEX($B$2:$B$41, MATCH($F1, $A$2:$A$41, 0))\n=IFNA(INDEX($C$2:$C$41, MATCH($F1, $A$2:$A$41, 0)), \"not on the roster\")",
+    "computed": [
+      "Name",
+      "Wed"
+    ]
+  },
+  "W3D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Every session carries an assistant, a day and a workload.",
+    "task": "Build the assistant-by-day workload matrix, then read any cell of it by naming the row and the column — one formula that answers every question of the form “how much does X carry on Y”, rather than 126 formulas.",
+    "requires": [
+      "INDEX",
+      "MATCH"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Which assistant",
+        "value": "AB",
+        "note": "The row half of the lookup."
+      },
+      {
+        "cell": "F2",
+        "label": "Which day",
+        "value": "Monday",
+        "note": "The column half. Change either and the one formula must follow."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Monday": 2.5,
+          "Tuesday": 0.0,
+          "Wednesday": 0.0,
+          "Thursday": 2.5,
+          "Friday": 0.0,
+          "Saturday": 0.0
+        },
+        {
+          "Ast": "BC",
+          "Monday": 0.0,
+          "Tuesday": 2.0,
+          "Wednesday": 0.0,
+          "Thursday": 0.0,
+          "Friday": 2.0,
+          "Saturday": 0.0
+        },
+        {
+          "Ast": "CD",
+          "Monday": 0.0,
+          "Tuesday": 0.0,
+          "Wednesday": 1.0,
+          "Thursday": 0.0,
+          "Friday": 0.0,
+          "Saturday": 1.0
+        },
+        {
+          "Ast": "DE",
+          "Monday": 2.0,
+          "Tuesday": 0.0,
+          "Wednesday": 0.0,
+          "Thursday": 2.0,
+          "Friday": 0.0,
+          "Saturday": 0.0
+        },
+        {
+          "Ast": "EF",
+          "Monday": 0.0,
+          "Tuesday": 2.0,
+          "Wednesday": 0.0,
+          "Thursday": 0.0,
+          "Friday": 2.0,
+          "Saturday": 0.0
+        },
+        {
+          "Ast": "FG",
+          "Monday": 0.0,
+          "Tuesday": 0.0,
+          "Wednesday": 1.0,
+          "Thursday": 0.0,
+          "Friday": 0.0,
+          "Saturday": 1.0
+        },
+        {
+          "Ast": "GH",
+          "Monday": 2.0,
+          "Tuesday": 0.0,
+          "Wednesday": 0.0,
+          "Thursday": 2.0,
+          "Friday": 0.0,
+          "Saturday": 0.0
+        },
+        {
+          "Ast": "HI",
+          "Monday": 0.0,
+          "Tuesday": 2.5,
+          "Wednesday": 0.0,
+          "Thursday": 0.0,
+          "Friday": 2.5,
+          "Saturday": 0.0
+        }
+      ]
+    },
+    "resultNote": "The first 8 assistants of 21. With AB and Monday in the control cells, the two-way lookup returns 2.5 — the matrix is the working, the single cell is the answer.",
+    "formula": "=INDEX($B$2:$G$22, MATCH($F1, $A$2:$A$22, 0), MATCH($F2, $B$1:$G$1, 0))",
+    "computed": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "sample": true
+  },
+  "W3D6": {
+    "dataset": "import",
+    "inputColumns": [
+      "Inisial",
+      "Name",
+      "Imported Name"
+    ],
+    "inputNote": "The clean roster, and beside it eight names pasted in from another system.",
+    "task": "Look up each imported name's initials with INDEX and MATCH before cleaning anything, and count the failures. Then clean the names with PROPER, TRIM and SUBSTITUTE, look them up again, and find the one that TRIM alone could not fix.",
+    "requires": [
+      "INDEX",
+      "MATCH",
+      "PROPER",
+      "TRIM",
+      "SUBSTITUTE"
+    ],
+    "result": {
+      "columns": [
+        "Imported Name",
+        "Cleaned",
+        "Before",
+        "After"
+      ],
+      "rows": [
+        {
+          "Imported Name": "hana indah",
+          "Cleaned": "Hana Indah",
+          "Before": "HI",
+          "After": "HI"
+        },
+        {
+          "Imported Name": "  Cindy Dewi",
+          "Cleaned": "Cindy Dewi",
+          "Before": "not found",
+          "After": "CD"
+        },
+        {
+          "Imported Name": "TONI UTAMA",
+          "Cleaned": "Toni Utama",
+          "Before": "TU",
+          "After": "TU"
+        },
+        {
+          "Imported Name": "Linda Maharani\u00a0",
+          "Cleaned": "Linda Maharani",
+          "Before": "not found",
+          "After": "LM"
+        },
+        {
+          "Imported Name": "erika fitri",
+          "Cleaned": "Erika Fitri",
+          "Before": "EF",
+          "After": "EF"
+        },
+        {
+          "Imported Name": "Fira Halim  ",
+          "Cleaned": "Fira Halim",
+          "Before": "not found",
+          "After": "FH"
+        },
+        {
+          "Imported Name": "QORI rahman",
+          "Cleaned": "Qori Rahman",
+          "Before": "QR",
+          "After": "QR"
+        },
+        {
+          "Imported Name": "adit cahyono",
+          "Cleaned": "Adit Cahyono",
+          "Before": "AC",
+          "After": "AC"
+        }
+      ]
+    },
+    "resultNote": "Before cleaning, 3 of 8 fail: Cindy Dewi has leading spaces, Fira Halim trailing ones, and Linda Maharani ends in a non-breaking space pasted from a web page. PROPER and TRIM alone reach 7 of 8, because TRIM only removes character 32, and =CODE(RIGHT(Data!C5,1)) on Linda's row returns 160. Swap it for a normal space with SUBSTITUTE first and all 8 resolve. The mixed-case names never failed, because MATCH ignores case.",
+    "formula": "=IFNA(INDEX(Data!$A$2:$A$41, MATCH(Data!C2, Data!$B$2:$B$41, 0)), \"not found\")\n=PROPER(TRIM(SUBSTITUTE(Data!C2, CHAR(160), \" \")))\n=IFNA(INDEX(Data!$A$2:$A$41, MATCH(B2, Data!$B$2:$B$41, 0)), \"not found\")",
+    "computed": [
+      "Cleaned",
+      "Before",
+      "After"
+    ],
+    "notChecked": [
+      "The before and after failure counts you record.",
+      "The Text to Columns split and the TEXTJOIN label."
+    ]
+  },
+  "W4D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "No",
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Workload runs 1.0 to 2.5 across the 41 sessions.",
+    "task": "Band every session by looking its workload up against a band table with XLOOKUP in next-smaller match mode. Set if_not_found so a workload the table does not cover reads as words rather than #N/A — then delete the table's first row and prove it.",
+    "requires": [
+      "XLOOKUP"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "If the band table misses",
+        "value": "unbanded",
+        "note": "XLOOKUP's if_not_found. Delete the 0.0 row from your band table and every light session must say this."
+      }
+    ],
+    "result": {
+      "columns": [
+        "No",
+        "Ast",
+        "Workload",
+        "Band"
+      ],
+      "rows": [
+        {
+          "No": 1,
+          "Ast": "AB",
+          "Workload": 2.5,
+          "Band": "heavy"
+        },
+        {
+          "No": 2,
+          "Ast": "BC",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 3,
+          "Ast": "CD",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 4,
+          "Ast": "DE",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 5,
+          "Ast": "EF",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 6,
+          "Ast": "FG",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 7,
+          "Ast": "GH",
+          "Workload": 2.0,
+          "Band": "standard"
+        },
+        {
+          "No": 8,
+          "Ast": "HI",
+          "Workload": 2.5,
+          "Band": "heavy"
+        },
+        {
+          "No": 9,
+          "Ast": "IJ",
+          "Workload": 1.0,
+          "Band": "light"
+        },
+        {
+          "No": 10,
+          "Ast": "JK",
+          "Workload": 2.0,
+          "Band": "standard"
+        }
+      ]
+    },
+    "resultNote": "The first 10 of 41, banded at 1.5 and 2.5. Zero errors is the deliverable: an #N/A anywhere means if_not_found was left out.",
+    "formula": "=XLOOKUP([@Workload], BandFloor, BandName, $F1, -1)",
+    "computed": [
+      "Band"
+    ],
+    "sample": true
+  },
+  "W4D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Course ID",
+      "Course Name"
+    ],
+    "inputNote": "Ten distinct course names, several sharing words.",
+    "task": "Find a course from a fragment of its name using XLOOKUP in wildcard match mode. Note that it returns the first match in table order, not the best one — so try a fragment that two courses share and decide whether that is acceptable.",
+    "requires": [
+      "XLOOKUP"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Search fragment",
+        "value": "*Data*",
+        "note": "Wildcards on both sides. *Data* matches two courses; you get the first one in the table."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Search",
+        "First match",
+        "Course ID"
+      ],
+      "rows": [
+        {
+          "Search": "*Data*",
+          "First match": "Data Structures",
+          "Course ID": "COMP6048002"
+        },
+        {
+          "Search": "*Net*",
+          "First match": "Computer Networks",
+          "Course ID": "COMP6051005"
+        },
+        {
+          "Search": "*Program*",
+          "First match": "Algorithm and Programming",
+          "Course ID": "COMP6047001"
+        },
+        {
+          "Search": "*Chemistry*",
+          "First match": "no course matches",
+          "Course ID": "no course matches"
+        }
+      ]
+    },
+    "resultNote": "Four fragments and what each returns. *Data* is the interesting one — both Data Structures and Database Systems match, and only one comes back.",
+    "formula": "=XLOOKUP($E1, tblTeaching[Course Name], tblTeaching[Course ID], \"no course matches\", 2)",
+    "computed": [
+      "First match",
+      "Course ID"
+    ]
+  },
+  "W4D3": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Name",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "inputNote": "The same roster W3D4 used, now read with the older functions.",
+    "task": "Rebuild the W3D4 lookup with VLOOKUP, and read a day column with HLOOKUP. Then insert a column between Inisial and Name and watch exactly which of the two breaks — that is why you learned INDEX MATCH first.",
+    "requires": [
+      "VLOOKUP",
+      "HLOOKUP"
+    ],
+    "controls": [
+      {
+        "cell": "K1",
+        "label": "Which initials",
+        "value": "AB",
+        "note": "The VLOOKUP key."
+      },
+      {
+        "cell": "K2",
+        "label": "Which day",
+        "value": "Monday",
+        "note": "The HLOOKUP key. Both must be cells, or the pair proves nothing."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Code",
+        "Name",
+        "Day",
+        "Shift"
+      ],
+      "rows": [
+        {
+          "Code": "AB",
+          "Name": "Alfred Abner",
+          "Day": "Monday",
+          "Shift": "M"
+        },
+        {
+          "Code": "HI",
+          "Name": "Hana Indah",
+          "Day": "Thursday",
+          "Shift": "P"
+        },
+        {
+          "Code": "TU",
+          "Name": "Toni Utama",
+          "Day": "Saturday",
+          "Shift": "N"
+        }
+      ]
+    },
+    "resultNote": "Three lookups, each combining both functions. Same answers as INDEX MATCH would give — until a column moves.",
+    "formula": "=VLOOKUP($K$1, $A$2:$H$41, 2, FALSE)\n=HLOOKUP(LEFT($K$2,3), $C$1:$H$41, MATCH($K$1,$A$2:$A$41,0)+1, FALSE)",
+    "computed": [
+      "Name",
+      "Shift"
+    ]
+  },
+  "W4D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Two keys, one answer: an assistant and a day together identify a session.",
+    "task": "Return the workload for a given assistant on a given day using one XLOOKUP nested inside another — the outer picking the row block, the inner picking within it. Same answer as W3D5's matrix, reached without building the matrix.",
+    "requires": [
+      "XLOOKUP"
+    ],
+    "controls": [
+      {
+        "cell": "F1",
+        "label": "Which assistant",
+        "value": "AB",
+        "note": "Outer key."
+      },
+      {
+        "cell": "F2",
+        "label": "Which day",
+        "value": "Monday",
+        "note": "Inner key. Try Sunday, which nobody works."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Day",
+        "Workload"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Day": "Monday",
+          "Workload": 2.5
+        },
+        {
+          "Ast": "BC",
+          "Day": "Tuesday",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "HI",
+          "Day": "Friday",
+          "Workload": 2.5
+        },
+        {
+          "Ast": "AB",
+          "Day": "Sunday",
+          "Workload": "no session"
+        }
+      ]
+    },
+    "resultNote": "Four pairs. The last has no session at all, which is what the nested if_not_found is for — a two-key lookup fails twice as often as a one-key one.",
+    "formula": "=XLOOKUP($F2, tblTeaching[Day], XLOOKUP($F1, tblTeaching[Ast], tblTeaching[Workload], \"no session\"), \"no session\")",
+    "computed": [
+      "Workload"
+    ]
+  },
+  "W4D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "41 sessions across 21 assistants; the totals are what matter.",
+    "task": "Build the overloaded list with the dynamic-array set working together: UNIQUE for the roster, SUMIFS for each total, SORT to rank them, FILTER to keep only those at or over the threshold. One formula, spilling, with the threshold in a cell — raise it and the list must shorten on its own.",
+    "requires": [
+      "UNIQUE",
+      "SORT",
+      "FILTER",
+      "SUMIFS"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Overloaded at or above",
+        "value": "4.0",
+        "note": "Raise it to 5 and the list must shorten by itself. A hand-picked list will not."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Total Workload"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "HI",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "BC",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "DE",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "EF",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "GH",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "JK",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "KL",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "MN",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "NO",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "PQ",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "QR",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "ST",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "TU",
+          "Total Workload": 4.0
+        }
+      ]
+    },
+    "resultNote": "14 of 21 assistants carry 4.0 or more, heaviest first. Ties break alphabetically, which is SORT's own behaviour rather than something you add.",
+    "formula": "=LET(names, UNIQUE(tblTeaching[Ast]),\n     loads, SUMIFS(tblTeaching[Workload], tblTeaching[Ast], names),\n     SORT(FILTER(HSTACK(names, loads), loads >= $E1), 2, -1))",
+    "computed": [
+      "Ast",
+      "Total Workload"
+    ],
+    "sortedBy": [
+      "-Total Workload"
+    ]
+  },
+  "W4D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "No",
+      "Course ID",
+      "Course Name",
+      "Ast",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Enough columns for four different kinds of question.",
+    "task": "Answer four questions, each with the lookup that fits it: an exact match, a partial match, a lookup that has to read left of its key, and a lookup on two conditions. Then write one line per question on why the other lookups lose.",
+    "requires": [
+      "XLOOKUP",
+      "INDEX",
+      "MATCH"
+    ],
+    "result": {
+      "columns": [
+        "Question",
+        "Right tool",
+        "Answer",
+        "Why the others lose"
+      ],
+      "rows": [
+        {
+          "Question": "Course name for session No 7",
+          "Right tool": "XLOOKUP, exact match",
+          "Answer": "Web Programming",
+          "Why the others lose": "VLOOKUP counts columns, so inserting one returns a wrong value with no error."
+        },
+        {
+          "Question": "First course whose name contains \"Net\"",
+          "Right tool": "XLOOKUP, match mode 2",
+          "Answer": "Computer Networks",
+          "Why the others lose": "An exact match on \"Net\" returns #N/A; a wildcard only works in match mode 2."
+        },
+        {
+          "Question": "Course ID for assistant HI",
+          "Right tool": "INDEX and MATCH",
+          "Answer": "COMP6054008",
+          "Why the others lose": "Course ID sits left of Ast, and VLOOKUP cannot read left of its key."
+        },
+        {
+          "Question": "Workload for HI on Friday",
+          "Right tool": "XLOOKUP on two conditions",
+          "Answer": 2.5,
+          "Why the others lose": "A one-key lookup cannot hold two criteria, and VLOOKUP has no way to combine them."
+        }
+      ]
+    },
+    "resultNote": "The Answer column is what Excel produces; the last column is what you write. Then the stretch: insert a column between Course ID and Ast, and watch a VLOOKUP written against the old layout return the wrong column with no error at all.",
+    "formula": "=XLOOKUP(7, Data!$A$2:$A$42, Data!$C$2:$C$42)\n=XLOOKUP(\"*Net*\", Data!$C$2:$C$42, Data!$C$2:$C$42, \"no match\", 2)\n=INDEX(Data!$B$2:$B$42, MATCH(\"HI\", Data!$D$2:$D$42, 0))\n=XLOOKUP(1, (Data!$D$2:$D$42=\"HI\") * (Data!$E$2:$E$42=\"Friday\"), Data!$F$2:$F$42, \"no session\")",
+    "reference": true
+  },
+  "W5D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "41 sessions; most assistants appear more than once.",
+    "task": "List every assistant once with UNIQUE, then total each one's workload with SUMIF beside it. Build it on the Answer sheet; the chart comes after, drawn from this table.",
+    "requires": [
+      "UNIQUE",
+      "SUMIF"
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Total Workload"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "BC",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "CD",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "DE",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "EF",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "FG",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "GH",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "HI",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "IJ",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "JK",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "KL",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "LM",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "MN",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "NO",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "OP",
+          "Total Workload": 3.0
+        },
+        {
+          "Ast": "PQ",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "QR",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "RS",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "ST",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "TU",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "UV",
+          "Total Workload": 1.0
+        }
+      ]
+    },
+    "resultNote": "21 assistants, and the totals add up to 72, the raw Workload total. If they do not, UNIQUE missed someone or SUMIF is reading the wrong range.",
+    "formula": "=UNIQUE(Data!A2:A42)\n=SUMIF(Data!$A$2:$A$42, A2#, Data!$B$2:$B$42)",
+    "computed": [
+      "Ast",
+      "Total Workload"
+    ],
+    "notChecked": [
+      "The chart: a real title, an axis title, and no legend or gridlines."
+    ]
+  },
+  "W5D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Group down the side, Lecturer Type across the top, Workload in the cells.",
+    "task": "Build the matrix with one SUMIFS that reads its group from the row label and its lecturer type from the column header, filled right and down.",
+    "requires": [
+      "SUMIFS"
+    ],
+    "result": {
+      "columns": [
+        "Group",
+        "VC",
+        "Forum"
+      ],
+      "rows": [
+        {
+          "Group": "G1",
+          "VC": 12.5,
+          "Forum": 3.5
+        },
+        {
+          "Group": "G2",
+          "VC": 12.5,
+          "Forum": 2.0
+        },
+        {
+          "Group": "G3",
+          "VC": 10.5,
+          "Forum": 3.0
+        },
+        {
+          "Group": "G4",
+          "VC": 10.5,
+          "Forum": 3.0
+        },
+        {
+          "Group": "G5",
+          "VC": 12.0,
+          "Forum": 2.5
+        }
+      ]
+    },
+    "resultNote": "Every group leans VC, and G2 is the most lopsided at 12.5 to 2. Group totals run from 13.5 to 16, and the whole grid sums to 72.",
+    "formula": "=SUMIFS(Data!$C$2:$C$42, Data!$A$2:$A$42, $A2, Data!$B$2:$B$42, B$1)",
+    "computed": [
+      "VC",
+      "Forum"
+    ],
+    "notChecked": [
+      "The clustered column chart and its colours."
+    ]
+  },
+  "W5D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "The same two columns as W5D1.",
+    "task": "Rank the W5D1 summary largest first with SORT, so the ranking updates when the data does. Then chart it as horizontal bars with the biggest on top.",
+    "requires": [
+      "SORT"
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Total Workload"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "HI",
+          "Total Workload": 5.0
+        },
+        {
+          "Ast": "BC",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "DE",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "EF",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "GH",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "JK",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "KL",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "MN",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "NO",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "PQ",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "QR",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "ST",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "TU",
+          "Total Workload": 4.0
+        },
+        {
+          "Ast": "OP",
+          "Total Workload": 3.0
+        },
+        {
+          "Ast": "CD",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "FG",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "IJ",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "LM",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "RS",
+          "Total Workload": 2.0
+        },
+        {
+          "Ast": "UV",
+          "Total Workload": 1.0
+        }
+      ]
+    },
+    "resultNote": "AB and HI lead at 5.0, twelve assistants sit at 4.0, and UV is last with 1.0. Tied assistants may come in either order.",
+    "formula": "=LET(names, UNIQUE(Data!A2:A42),\n     SORT(HSTACK(names, SUMIF(Data!A2:A42, names, Data!B2:B42)), 2, -1))",
+    "computed": [
+      "Ast",
+      "Total Workload"
+    ],
+    "sortedBy": [
+      "-Total Workload"
+    ],
+    "notChecked": [
+      "The bar chart: categories in reverse order, and data labels."
+    ]
+  },
+  "W5D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group"
+    ],
+    "inputNote": "One column: which group each session belongs to.",
+    "task": "Count sessions per group with COUNTIF and work out each group's share of all sessions, largest first. Chart it as a pie, then as a sorted bar, and write one line on which reads faster.",
+    "requires": [
+      "COUNTIF"
+    ],
+    "result": {
+      "columns": [
+        "Group",
+        "Sessions",
+        "Share"
+      ],
+      "rows": [
+        {
+          "Group": "G1",
+          "Sessions": 9.0,
+          "Share": 0.2195
+        },
+        {
+          "Group": "G2",
+          "Sessions": 8.0,
+          "Share": 0.1951
+        },
+        {
+          "Group": "G3",
+          "Sessions": 8.0,
+          "Share": 0.1951
+        },
+        {
+          "Group": "G4",
+          "Sessions": 8.0,
+          "Share": 0.1951
+        },
+        {
+          "Group": "G5",
+          "Sessions": 8.0,
+          "Share": 0.1951
+        }
+      ]
+    },
+    "resultNote": "G1 has 9 sessions (22%); the other four have 8 each (19.5%). Five near-equal slices is exactly what a pie cannot rank. Share is checked to four decimal places, so format it as a percentage however you like.",
+    "formula": "=COUNTIF(Data!$A$2:$A$42, A2)\n=B2 / SUM($B$2:$B$6)",
+    "computed": [
+      "Sessions",
+      "Share"
+    ],
+    "sortedBy": [
+      "-Sessions"
+    ],
+    "notChecked": [
+      "The pie, the bar, and your one-line critique."
+    ]
+  },
+  "W5D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Six days, Monday to Saturday.",
+    "task": "Per day, count sessions with COUNTIF and total workload with SUMIF, Monday to Saturday in calendar order. Then a combo chart: sessions as columns, workload as a line on a secondary axis.",
+    "requires": [
+      "COUNTIF",
+      "SUMIF"
+    ],
+    "result": {
+      "columns": [
+        "Day",
+        "Sessions",
+        "Workload"
+      ],
+      "rows": [
+        {
+          "Day": "Monday",
+          "Sessions": 7.0,
+          "Workload": 14.5
+        },
+        {
+          "Day": "Tuesday",
+          "Sessions": 7.0,
+          "Workload": 14.5
+        },
+        {
+          "Day": "Wednesday",
+          "Sessions": 7.0,
+          "Workload": 7.5
+        },
+        {
+          "Day": "Thursday",
+          "Sessions": 7.0,
+          "Workload": 14.5
+        },
+        {
+          "Day": "Friday",
+          "Sessions": 7.0,
+          "Workload": 14.5
+        },
+        {
+          "Day": "Saturday",
+          "Sessions": 6.0,
+          "Workload": 6.5
+        }
+      ]
+    },
+    "resultNote": "Every day has 7 sessions except Saturday with 6, yet workload drops to 7.5 on Wednesday and 6.5 on Saturday. The count alone hides the thin days, which is why the chart needs both. Keep calendar order: a line over days sorted A to Z means nothing.",
+    "formula": "=COUNTIF(Data!$A$2:$A$42, A2)\n=SUMIF(Data!$A$2:$A$42, A2, Data!$B$2:$B$42)",
+    "computed": [
+      "Sessions",
+      "Workload"
+    ],
+    "rowOrder": "listed",
+    "notChecked": [
+      "The combo chart and its secondary axis."
+    ]
+  },
+  "W5D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Lecturer Type",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "One question, four charts, all from the same summary.",
+    "task": "Chart one question, who carries the load, four ways: a ranked bar, a grouped comparison, a pie and a combo. Keep the one that answers fastest, write why each of the other three loses, then retitle the winner so its title states the answer.",
+    "result": {
+      "columns": [
+        "Chart",
+        "Verdict",
+        "Why"
+      ],
+      "rows": [
+        {
+          "Chart": "Ranked bar",
+          "Verdict": "Keep",
+          "Why": "Answers in one glance, needs no legend, and the order is the answer."
+        },
+        {
+          "Chart": "Grouped column",
+          "Verdict": "Reject",
+          "Why": "Adds a second question, VC against Forum, that nobody asked, and needs a legend to do it."
+        },
+        {
+          "Chart": "Pie",
+          "Verdict": "Reject",
+          "Why": "21 slices, twelve of them the same 4.0. Nobody can rank that by angle."
+        },
+        {
+          "Chart": "Combo",
+          "Verdict": "Reject",
+          "Why": "Puts two metrics on screen when the question named one."
+        }
+      ]
+    },
+    "resultNote": "The ranked bar wins. Its title should state the answer rather than the topic: \"AB and HI carry the most load, 5.0 each against a median of 4.0\", not \"Workload by assistant\".",
+    "formula": "Insert > Chart, once for each of the four\nLink the winner's title to a cell that states the answer",
+    "reference": true
+  },
+  "W6D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Enough to count assistants and find the heaviest load.",
+    "task": "Build the chart title in a cell, so it cannot go stale: \"Workload by Assistant - \" followed by the number of assistants and \" TAs\". Beside it, find the most loaded assistant with INDEX, MATCH and MAX. Then link the chart title to the title cell through the formula bar.",
+    "requires": [
+      "UNIQUE",
+      "INDEX",
+      "MATCH",
+      "MAX"
+    ],
+    "result": {
+      "columns": [
+        "Title",
+        "Most loaded"
+      ],
+      "rows": [
+        {
+          "Title": "Workload by Assistant - 21 TAs",
+          "Most loaded": "AB"
+        }
+      ]
+    },
+    "resultNote": "The title reads \"Workload by Assistant - 21 TAs\". AB and HI tie at 5.0, and MATCH returns the first one it meets, so the answer is AB. A dashboard that names only AB is hiding the tie.",
+    "formula": "=\"Workload by Assistant - \" & COUNTA(UNIQUE(Data!A2:A42)) & \" TAs\"\n=LET(names, UNIQUE(Data!A2:A42), totals, SUMIF(Data!A2:A42, names, Data!B2:B42),\n     INDEX(names, MATCH(MAX(totals), totals, 0)))",
+    "computed": [
+      "Title",
+      "Most loaded"
+    ],
+    "notChecked": [
+      "Whether the chart title is linked to the cell."
+    ]
+  },
+  "W6D2": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "inputNote": "P = Pagi, N = Normal, M = Malam. A blank is a day off.",
+    "task": "Count each shift code per weekday with COUNTIF: P, N and M down the side, Mon to Sat across, and a Total row under them. Then a stacked column chart, one stack per day.",
+    "requires": [
+      "COUNTIF"
+    ],
+    "result": {
+      "columns": [
+        "Code",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "rows": [
+        {
+          "Code": "P",
+          "Mon": 13.0,
+          "Tue": 12.0,
+          "Wed": 15.0,
+          "Thu": 18.0,
+          "Fri": 14.0,
+          "Sat": 11.0
+        },
+        {
+          "Code": "N",
+          "Mon": 13.0,
+          "Tue": 14.0,
+          "Wed": 10.0,
+          "Thu": 12.0,
+          "Fri": 14.0,
+          "Sat": 18.0
+        },
+        {
+          "Code": "M",
+          "Mon": 12.0,
+          "Tue": 4.0,
+          "Wed": 6.0,
+          "Thu": 4.0,
+          "Fri": 3.0,
+          "Sat": 5.0
+        },
+        {
+          "Code": "Total",
+          "Mon": 38.0,
+          "Tue": 30.0,
+          "Wed": 31.0,
+          "Thu": 34.0,
+          "Fri": 31.0,
+          "Sat": 34.0
+        }
+      ]
+    },
+    "resultNote": "Totals run 38, 30, 31, 34, 31, 34. Tuesday is the thinnest day: 10 of 40 people are off, and only 4 work Malam. Each total must equal 40 minus that day's blanks; if one comes up short, a code has a stray space or the wrong case.",
+    "formula": "=COUNTIF(Data!A$2:A$41, $A2)\n=SUM(B2:B4)",
+    "computed": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "notChecked": [
+      "The stacked column chart."
+    ]
+  },
+  "W6D3": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "inputNote": "The roster. Codes have to become numbers before a sparkline can draw them.",
+    "task": "Map each code to a number with XLOOKUP, P to 1, N to 2, M to 3, and a day off to 0, one row per assistant. Then add a line sparkline beside each row, all sharing one 0 to 3 axis.",
+    "requires": [
+      "XLOOKUP"
+    ],
+    "result": {
+      "columns": [
+        "Inisial",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "rows": [
+        {
+          "Inisial": "AB",
+          "Mon": 3.0,
+          "Tue": 1.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "BC",
+          "Mon": 2.0,
+          "Tue": 2.0,
+          "Wed": 0.0,
+          "Thu": 3.0,
+          "Fri": 0.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "CD",
+          "Mon": 1.0,
+          "Tue": 0.0,
+          "Wed": 3.0,
+          "Thu": 2.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "DE",
+          "Mon": 3.0,
+          "Tue": 2.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 1.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "EF",
+          "Mon": 3.0,
+          "Tue": 1.0,
+          "Wed": 1.0,
+          "Thu": 0.0,
+          "Fri": 1.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "FG",
+          "Mon": 1.0,
+          "Tue": 2.0,
+          "Wed": 0.0,
+          "Thu": 2.0,
+          "Fri": 1.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "GH",
+          "Mon": 2.0,
+          "Tue": 2.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 0.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "HI",
+          "Mon": 2.0,
+          "Tue": 0.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "IJ",
+          "Mon": 1.0,
+          "Tue": 1.0,
+          "Wed": 3.0,
+          "Thu": 2.0,
+          "Fri": 1.0,
+          "Sat": 3.0
+        },
+        {
+          "Inisial": "JK",
+          "Mon": 2.0,
+          "Tue": 0.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "KL",
+          "Mon": 1.0,
+          "Tue": 0.0,
+          "Wed": 0.0,
+          "Thu": 2.0,
+          "Fri": 1.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "LM",
+          "Mon": 1.0,
+          "Tue": 2.0,
+          "Wed": 0.0,
+          "Thu": 2.0,
+          "Fri": 1.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "MN",
+          "Mon": 1.0,
+          "Tue": 0.0,
+          "Wed": 1.0,
+          "Thu": 3.0,
+          "Fri": 1.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "NO",
+          "Mon": 3.0,
+          "Tue": 2.0,
+          "Wed": 3.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "OP",
+          "Mon": 1.0,
+          "Tue": 0.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "PQ",
+          "Mon": 3.0,
+          "Tue": 1.0,
+          "Wed": 2.0,
+          "Thu": 2.0,
+          "Fri": 1.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "QR",
+          "Mon": 1.0,
+          "Tue": 1.0,
+          "Wed": 0.0,
+          "Thu": 0.0,
+          "Fri": 2.0,
+          "Sat": 3.0
+        },
+        {
+          "Inisial": "RS",
+          "Mon": 2.0,
+          "Tue": 2.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 3.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "ST",
+          "Mon": 3.0,
+          "Tue": 2.0,
+          "Wed": 2.0,
+          "Thu": 2.0,
+          "Fri": 0.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "TU",
+          "Mon": 1.0,
+          "Tue": 1.0,
+          "Wed": 1.0,
+          "Thu": 3.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "UV",
+          "Mon": 2.0,
+          "Tue": 2.0,
+          "Wed": 3.0,
+          "Thu": 0.0,
+          "Fri": 2.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "VW",
+          "Mon": 3.0,
+          "Tue": 2.0,
+          "Wed": 1.0,
+          "Thu": 0.0,
+          "Fri": 1.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "WX",
+          "Mon": 2.0,
+          "Tue": 1.0,
+          "Wed": 0.0,
+          "Thu": 2.0,
+          "Fri": 0.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "XY",
+          "Mon": 3.0,
+          "Tue": 1.0,
+          "Wed": 0.0,
+          "Thu": 1.0,
+          "Fri": 0.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "YZ",
+          "Mon": 1.0,
+          "Tue": 1.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 3.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "AC",
+          "Mon": 2.0,
+          "Tue": 0.0,
+          "Wed": 2.0,
+          "Thu": 0.0,
+          "Fri": 1.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "BD",
+          "Mon": 3.0,
+          "Tue": 3.0,
+          "Wed": 3.0,
+          "Thu": 0.0,
+          "Fri": 1.0,
+          "Sat": 0.0
+        },
+        {
+          "Inisial": "CE",
+          "Mon": 3.0,
+          "Tue": 3.0,
+          "Wed": 2.0,
+          "Thu": 2.0,
+          "Fri": 0.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "DF",
+          "Mon": 2.0,
+          "Tue": 1.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "EG",
+          "Mon": 2.0,
+          "Tue": 0.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 1.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "FH",
+          "Mon": 3.0,
+          "Tue": 2.0,
+          "Wed": 0.0,
+          "Thu": 3.0,
+          "Fri": 1.0,
+          "Sat": 3.0
+        },
+        {
+          "Inisial": "GI",
+          "Mon": 2.0,
+          "Tue": 1.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 0.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "HJ",
+          "Mon": 3.0,
+          "Tue": 3.0,
+          "Wed": 1.0,
+          "Thu": 2.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "IK",
+          "Mon": 2.0,
+          "Tue": 0.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "JL",
+          "Mon": 1.0,
+          "Tue": 3.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "KM",
+          "Mon": 0.0,
+          "Tue": 2.0,
+          "Wed": 1.0,
+          "Thu": 2.0,
+          "Fri": 3.0,
+          "Sat": 3.0
+        },
+        {
+          "Inisial": "LN",
+          "Mon": 1.0,
+          "Tue": 0.0,
+          "Wed": 2.0,
+          "Thu": 1.0,
+          "Fri": 1.0,
+          "Sat": 3.0
+        },
+        {
+          "Inisial": "MO",
+          "Mon": 0.0,
+          "Tue": 1.0,
+          "Wed": 3.0,
+          "Thu": 2.0,
+          "Fri": 0.0,
+          "Sat": 2.0
+        },
+        {
+          "Inisial": "NP",
+          "Mon": 1.0,
+          "Tue": 2.0,
+          "Wed": 1.0,
+          "Thu": 1.0,
+          "Fri": 0.0,
+          "Sat": 1.0
+        },
+        {
+          "Inisial": "OQ",
+          "Mon": 2.0,
+          "Tue": 2.0,
+          "Wed": 0.0,
+          "Thu": 1.0,
+          "Fri": 2.0,
+          "Sat": 1.0
+        }
+      ]
+    },
+    "resultNote": "40 rows of 0 to 3. The 0s matter: without a not-found value a day off becomes #N/A and breaks the sparkline.",
+    "formula": "=XLOOKUP(Data!B2, {\"P\";\"N\";\"M\"}, {1;2;3}, 0)",
+    "computed": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "notChecked": [
+      "The sparklines and their shared axis."
+    ]
+  },
+  "W6D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Every card comes from these two columns.",
+    "task": "Four KPI cards, each one a formula: total sessions, total workload, number of distinct assistants, and average load per assistant. Put the four headers in one row with the numbers under them.",
+    "requires": [
+      "SUM",
+      "UNIQUE"
+    ],
+    "result": {
+      "columns": [
+        "Total sessions",
+        "Total workload",
+        "Assistants",
+        "Avg load"
+      ],
+      "rows": [
+        {
+          "Total sessions": 41.0,
+          "Total workload": 72.0,
+          "Assistants": 21.0,
+          "Avg load": 3.43
+        }
+      ]
+    },
+    "resultNote": "41 sessions, 72 workload, 21 assistants, 3.43 average. They must agree with each other: 72 / 21 = 3.43. If the average disagrees, one card is counting blank rows.",
+    "formula": "=COUNTA(Data!A2:A42)\n=SUM(Data!B2:B42)\n=COUNTA(UNIQUE(Data!A2:A42))\n=B2 / C2",
+    "computed": [
+      "Total sessions",
+      "Total workload",
+      "Assistants",
+      "Avg load"
+    ],
+    "notChecked": [
+      "The layout: one screen, no scrolling, one accent colour."
+    ]
+  },
+  "W6D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Workload"
+    ],
+    "inputNote": "Group is the filter; the control cell picks which one.",
+    "task": "Total each assistant's workload for one group only, with the group read from the control cell. Every assistant keeps a row, so an assistant who does not teach that group shows 0.",
+    "requires": [
+      "SUMIFS"
+    ],
+    "controls": [
+      {
+        "cell": "E1",
+        "label": "Group",
+        "value": "G2",
+        "note": "Make this a dropdown of G1 to G5 with Data Validation. Switch it to G1 and the column must total 16 without editing a formula."
+      }
+    ],
+    "result": {
+      "columns": [
+        "Ast",
+        "Workload"
+      ],
+      "rows": [
+        {
+          "Ast": "AB",
+          "Workload": 2.5
+        },
+        {
+          "Ast": "BC",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "CD",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "DE",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "EF",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "FG",
+          "Workload": 1.0
+        },
+        {
+          "Ast": "GH",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "HI",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "IJ",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "JK",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "KL",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "LM",
+          "Workload": 1.0
+        },
+        {
+          "Ast": "MN",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "NO",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "OP",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "PQ",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "QR",
+          "Workload": 2.0
+        },
+        {
+          "Ast": "RS",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "ST",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "TU",
+          "Workload": 0.0
+        },
+        {
+          "Ast": "UV",
+          "Workload": 0.0
+        }
+      ]
+    },
+    "resultNote": "For G2, eight assistants carry 14.5 between them, AB the most at 2.5, and the other 13 show 0.",
+    "formula": "=SUMIFS(Data!$C$2:$C$42, Data!$A$2:$A$42, A2, Data!$B$2:$B$42, Data!$E$1)",
+    "computed": [
+      "Workload"
+    ],
+    "notChecked": [
+      "The charts redrawing when the group changes."
+    ]
+  },
+  "W6D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "The week's pieces, assembled on one tab. The coverage view reads the Workshift roster.",
+    "task": "Put the week together on one tab: a KPI row, a coverage view, a sparkline column and a title that names the current filter. Formulas only, no pivots. Then change the Group dropdown and confirm every piece of text on the sheet moves with it.",
+    "result": {
+      "columns": [
+        "Piece",
+        "Shows",
+        "Reads from"
+      ],
+      "rows": [
+        {
+          "Piece": "KPI row",
+          "Shows": "41 sessions, 72 workload, 21 assistants, 3.43 average",
+          "Reads from": "COUNTA, SUM, COUNTA of UNIQUE, and a division"
+        },
+        {
+          "Piece": "Coverage view",
+          "Shows": "Tuesday is the thinnest day, with 30 of 40 on shift",
+          "Reads from": "COUNTIF per day and shift code, as in W6D2"
+        },
+        {
+          "Piece": "Sparkline column",
+          "Shows": "One 0 to 3 line per assistant on a shared axis",
+          "Reads from": "The XLOOKUP code map from W6D3"
+        },
+        {
+          "Piece": "Title",
+          "Shows": "Workload by Assistant - all groups",
+          "Reads from": "A formula on the Group dropdown, so it changes with the filter"
+        }
+      ]
+    },
+    "resultNote": "What each piece shows before any filter. The test is the last row: pick G2 and the title must change with it. Any text on the tab that does not move is hardcoded.",
+    "formula": "=\"Workload by Assistant - \" & IF($B$1=\"All\", \"all groups\", $B$1)",
+    "reference": true
+  },
+  "W7D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "The full table; the pivot does the summing.",
+    "task": "Insert a PivotTable with Ast in Rows and Workload in Values, sorted largest to smallest. Check it against your W5D3 formulas before trusting it, then change a workload in the source and see what the pivot does.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload"
+      ],
+      "rows": [
+        {
+          "Row Labels": "AB",
+          "Sum of Workload": 5.0
+        },
+        {
+          "Row Labels": "HI",
+          "Sum of Workload": 5.0
+        },
+        {
+          "Row Labels": "BC",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "DE",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "EF",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "GH",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "JK",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "KL",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "MN",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "NO",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "PQ",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "QR",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "ST",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "TU",
+          "Sum of Workload": 4.0
+        },
+        {
+          "Row Labels": "OP",
+          "Sum of Workload": 3.0
+        },
+        {
+          "Row Labels": "CD",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "FG",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "IJ",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "LM",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "RS",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "UV",
+          "Sum of Workload": 1.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 72.0
+        }
+      ]
+    },
+    "resultNote": "Identical to the W5D3 ranking, with a Grand Total of 72. Now edit any workload in the source: the pivot keeps the old number until you press Alt+F5. Formulas recalculate; pivots refresh.",
+    "formula": "Insert > PivotTable\nRows: Ast · Values: Sum of Workload\nSort Largest to Smallest on the value column",
+    "reference": true
+  },
+  "W7D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Course Name",
+      "Workload"
+    ],
+    "inputNote": "Course Name is there to be counted.",
+    "task": "Add a session count to the W7D1 pivot by dragging Course Name into Values. Rename both headers so a stranger can read them, set number formats inside Value Field Settings, and sort by workload.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Total Workload",
+        "Sessions"
+      ],
+      "rows": [
+        {
+          "Row Labels": "AB",
+          "Total Workload": 5.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "HI",
+          "Total Workload": 5.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "BC",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "DE",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "EF",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "GH",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "JK",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "KL",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "MN",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "NO",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "PQ",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "QR",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "ST",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "TU",
+          "Total Workload": 4.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "OP",
+          "Total Workload": 3.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "CD",
+          "Total Workload": 2.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "FG",
+          "Total Workload": 2.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "IJ",
+          "Total Workload": 2.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "LM",
+          "Total Workload": 2.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "RS",
+          "Total Workload": 2.0,
+          "Sessions": 2.0
+        },
+        {
+          "Row Labels": "UV",
+          "Total Workload": 1.0,
+          "Sessions": 1.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Total Workload": 72.0,
+          "Sessions": 41.0
+        }
+      ]
+    },
+    "resultNote": "Every assistant has 2 sessions except UV with 1, 41 in all. Course Name counts rather than sums because it is text. Sum of Workload cannot be renamed Workload, since that is a source column's name, so it becomes Total Workload.",
+    "formula": "Values: Course Name (Count), renamed Sessions\nValue Field Settings > Number Format on each metric",
+    "reference": true
+  },
+  "W7D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "The W5D2 inputs, now for a pivot.",
+    "task": "Group to Rows, Lecturer Type to Columns, Workload to Values, grand totals on. This is the W5D2 matrix as a live pivot.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Forum",
+        "VC",
+        "Grand Total"
+      ],
+      "rows": [
+        {
+          "Row Labels": "G1",
+          "Forum": 3.5,
+          "VC": 12.5,
+          "Grand Total": 16.0
+        },
+        {
+          "Row Labels": "G2",
+          "Forum": 2.0,
+          "VC": 12.5,
+          "Grand Total": 14.5
+        },
+        {
+          "Row Labels": "G3",
+          "Forum": 3.0,
+          "VC": 10.5,
+          "Grand Total": 13.5
+        },
+        {
+          "Row Labels": "G4",
+          "Forum": 3.0,
+          "VC": 10.5,
+          "Grand Total": 13.5
+        },
+        {
+          "Row Labels": "G5",
+          "Forum": 2.5,
+          "VC": 12.0,
+          "Grand Total": 14.5
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Forum": 14.0,
+          "VC": 58.0,
+          "Grand Total": 72.0
+        }
+      ]
+    },
+    "resultNote": "The same cells as W5D2. Pivot columns sort A to Z, so Forum comes before VC. VC carries 58 of 72, 80.6% of all load. The grid does not show the ratio inside each row; that is what W8D2's Show Values As is for.",
+    "formula": "Rows: Group · Columns: Lecturer Type · Values: Sum of Workload",
+    "reference": true
+  },
+  "W7D4": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "inputNote": "The roster is wide, one column per day. A pivot needs it long: one row per person per day, with Day and Shift columns.",
+    "task": "Reshape the roster into Day and Shift columns, then pivot it: Day to Rows, Shift to Columns, a count to Values. Set empty cells to show 0, then add a colour scale to find the thinnest slot.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "M",
+        "N",
+        "P",
+        "Grand Total"
+      ],
+      "rows": [
+        {
+          "Row Labels": "Mon",
+          "M": 12.0,
+          "N": 13.0,
+          "P": 13.0,
+          "Grand Total": 38.0
+        },
+        {
+          "Row Labels": "Tue",
+          "M": 4.0,
+          "N": 14.0,
+          "P": 12.0,
+          "Grand Total": 30.0
+        },
+        {
+          "Row Labels": "Wed",
+          "M": 6.0,
+          "N": 10.0,
+          "P": 15.0,
+          "Grand Total": 31.0
+        },
+        {
+          "Row Labels": "Thu",
+          "M": 4.0,
+          "N": 12.0,
+          "P": 18.0,
+          "Grand Total": 34.0
+        },
+        {
+          "Row Labels": "Fri",
+          "M": 3.0,
+          "N": 14.0,
+          "P": 14.0,
+          "Grand Total": 31.0
+        },
+        {
+          "Row Labels": "Sat",
+          "M": 5.0,
+          "N": 18.0,
+          "P": 11.0,
+          "Grand Total": 34.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "M": 34.0,
+          "N": 81.0,
+          "P": 83.0,
+          "Grand Total": 198.0
+        }
+      ]
+    },
+    "resultNote": "198 shifts across the week. Friday Malam is the coldest cell with 3 people, and Tuesday and Thursday Malam have 4. Days off are not shifts, so they are left out. Pivot columns sort A to Z: M, N, P.",
+    "formula": "Reshape to Day | Shift, dropping days off\nRows: Day · Columns: Shift · Values: Count of Inisial\nPivotTable Options > For empty cells show: 0",
+    "reference": true
+  },
+  "W7D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "Add a Sessions column of 1s to the source; a calculated field can only use source fields.",
+    "task": "Add a calculated field that divides workload by sessions, beside the raw sums. Then compare its Grand Total with the average of the rows above it.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload",
+        "Sessions",
+        "Avg per Session"
+      ],
+      "rows": [
+        {
+          "Row Labels": "AB",
+          "Sum of Workload": 5.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.5
+        },
+        {
+          "Row Labels": "BC",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "CD",
+          "Sum of Workload": 2.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "DE",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "EF",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "FG",
+          "Sum of Workload": 2.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "GH",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "HI",
+          "Sum of Workload": 5.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.5
+        },
+        {
+          "Row Labels": "IJ",
+          "Sum of Workload": 2.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "JK",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "KL",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "LM",
+          "Sum of Workload": 2.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "MN",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "NO",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "OP",
+          "Sum of Workload": 3.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.5
+        },
+        {
+          "Row Labels": "PQ",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "QR",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "RS",
+          "Sum of Workload": 2.0,
+          "Sessions": 2.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "ST",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "TU",
+          "Sum of Workload": 4.0,
+          "Sessions": 2.0,
+          "Avg per Session": 2.0
+        },
+        {
+          "Row Labels": "UV",
+          "Sum of Workload": 1.0,
+          "Sessions": 1.0,
+          "Avg per Session": 1.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 72.0,
+          "Sessions": 41.0,
+          "Avg per Session": 1.7561
+        }
+      ]
+    },
+    "resultNote": "Most assistants average 2.0 per session. The Grand Total reads 1.7561, which is 72 / 41, while the average of the 21 row values is 1.738. A calculated field sums its inputs across the whole table first and divides after. Neither number is wrong, they answer different questions, and the pivot does not say which one you got.",
+    "formula": "Source: Sessions = 1 on every row\nFields, Items & Sets > Calculated Field: Avg per Session = Workload / Sessions",
+    "reference": true
+  },
+  "W7D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Lecturer Type",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Weeks 5 and 6, rebuilt as pivots.",
+    "task": "Rebuild four earlier answers as pivots on one tab, time yourself, and check each against its formula original.",
+    "result": {
+      "columns": [
+        "Pivot",
+        "Matches",
+        "Check"
+      ],
+      "rows": [
+        {
+          "Pivot": "Workload per assistant",
+          "Matches": "W5D1",
+          "Check": "Grand Total 72"
+        },
+        {
+          "Pivot": "Group by lecturer type",
+          "Matches": "W5D2",
+          "Check": "VC 58, Forum 14"
+        },
+        {
+          "Pivot": "Day by shift coverage",
+          "Matches": "W6D2",
+          "Check": "198 shifts across the week"
+        },
+        {
+          "Pivot": "Per-session average",
+          "Matches": "W7D5",
+          "Check": "1.76 for the whole table"
+        }
+      ]
+    },
+    "resultNote": "Every pivot must match its original exactly. If one does not, it is filtering something you did not intend, usually a stale cached item. The answer a formula still does better is any number inside a sentence or a KPI card, because a pivot cell moves when the pivot reshapes.",
+    "formula": "One tab, four PivotTables from the same source",
+    "reference": true
+  },
+  "W8D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Six days to fold into two bands.",
+    "task": "Pivot workload by Day, then group Monday to Wednesday as Early week and Thursday to Saturday as Late week.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload"
+      ],
+      "rows": [
+        {
+          "Row Labels": "Early week",
+          "Sum of Workload": 36.5
+        },
+        {
+          "Row Labels": "Late week",
+          "Sum of Workload": 35.5
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 72.0
+        }
+      ]
+    },
+    "resultNote": "36.5 early against 35.5 late, still 72 in total. Grouping reshapes and never filters, so a Grand Total that moves means something was excluded. If Group is greyed out, the field holds a blank or a stray text value.",
+    "formula": "Select Monday to Wednesday > right-click > Group, rename Early week\nRepeat for Thursday to Saturday",
+    "reference": true
+  },
+  "W8D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "One field, shown three ways.",
+    "task": "Show Workload three ways in one pivot: as it is, as % of Column Total, and ranked largest to smallest.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "No Calculation",
+        "% of Column Total",
+        "Rank"
+      ],
+      "rows": [
+        {
+          "Row Labels": "AB",
+          "No Calculation": 5.0,
+          "% of Column Total": 0.0694,
+          "Rank": 1.0
+        },
+        {
+          "Row Labels": "HI",
+          "No Calculation": 5.0,
+          "% of Column Total": 0.0694,
+          "Rank": 1.0
+        },
+        {
+          "Row Labels": "BC",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "DE",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "EF",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "GH",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "JK",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "KL",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "MN",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "NO",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "PQ",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "QR",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "ST",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "TU",
+          "No Calculation": 4.0,
+          "% of Column Total": 0.0556,
+          "Rank": 2.0
+        },
+        {
+          "Row Labels": "OP",
+          "No Calculation": 3.0,
+          "% of Column Total": 0.0417,
+          "Rank": 3.0
+        },
+        {
+          "Row Labels": "CD",
+          "No Calculation": 2.0,
+          "% of Column Total": 0.0278,
+          "Rank": 4.0
+        },
+        {
+          "Row Labels": "FG",
+          "No Calculation": 2.0,
+          "% of Column Total": 0.0278,
+          "Rank": 4.0
+        },
+        {
+          "Row Labels": "IJ",
+          "No Calculation": 2.0,
+          "% of Column Total": 0.0278,
+          "Rank": 4.0
+        },
+        {
+          "Row Labels": "LM",
+          "No Calculation": 2.0,
+          "% of Column Total": 0.0278,
+          "Rank": 4.0
+        },
+        {
+          "Row Labels": "RS",
+          "No Calculation": 2.0,
+          "% of Column Total": 0.0278,
+          "Rank": 4.0
+        },
+        {
+          "Row Labels": "UV",
+          "No Calculation": 1.0,
+          "% of Column Total": 0.0139,
+          "Rank": 5.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "No Calculation": 72.0,
+          "% of Column Total": 1.0,
+          "Rank": ""
+        }
+      ]
+    },
+    "resultNote": "AB and HI each carry 6.9%. Pivot ranks are dense: the two tied at 5.0 are both 1, the twelve at 4.0 are all 2, and UV is 5. RANK.EQ would put the 4.0s at 3, so do not mix the two. The % column must total 100%.",
+    "formula": "Add Workload to Values three times\nShow Values As > % of Column Total\nShow Values As > Rank Largest to Smallest, base field Ast",
+    "reference": true
+  },
+  "W8D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "Group and Lecturer Type become slicers.",
+    "task": "Add Group and Lecturer Type slicers to the assistant pivot, style them as buttons, then set Group to G2 and Lecturer Type to VC.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload"
+      ],
+      "rows": [
+        {
+          "Row Labels": "AB",
+          "Sum of Workload": 2.5
+        },
+        {
+          "Row Labels": "BC",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "GH",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "KL",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "PQ",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "QR",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 12.5
+        }
+      ]
+    },
+    "resultNote": "Six assistants are left, carrying 12.5, with AB the most at 2.5. Assistants with no G2 VC sessions disappear rather than showing 0. Tick Hide items with no data so each slicer stops offering choices that lead nowhere.",
+    "formula": "PivotTable Analyze > Insert Slicer > Group, Lecturer Type\nSlicer Settings > Hide items with no data",
+    "reference": true
+  },
+  "W8D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Two pivots from the same source.",
+    "task": "Build a workload-by-assistant pivot and a workload-by-day pivot from the same source, then connect one Group slicer to both with Report Connections. Set it to G3.",
+    "result": {
+      "columns": [
+        "Pivot",
+        "Rows shown",
+        "Grand Total"
+      ],
+      "rows": [
+        {
+          "Pivot": "Workload by assistant",
+          "Rows shown": 8.0,
+          "Grand Total": 13.5
+        },
+        {
+          "Pivot": "Workload by day",
+          "Rows shown": 6.0,
+          "Grand Total": 13.5
+        }
+      ]
+    },
+    "resultNote": "The assistant pivot shows 8 rows and the day pivot 6, and both total 13.5. That agreement is the test. A pivot missing from Report Connections was built on its own cache: copy the first pivot and change its fields instead of inserting a new one.",
+    "formula": "Right-click the slicer > Report Connections > tick both pivots",
+    "reference": true
+  },
+  "W8D5": {
+    "dataset": "workshift",
+    "inputColumns": [
+      "Inisial",
+      "Gen",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
+    "inputNote": "The roster with Gen, the cohort each assistant joined in.",
+    "task": "Reshape the roster to one row per person per day (Inisial, Gen, Day, Code), drop the days off, then pivot: Gen to Rows, Code to Columns, a count to Values.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "M",
+        "N",
+        "P",
+        "Grand Total"
+      ],
+      "rows": [
+        {
+          "Row Labels": "24-1",
+          "M": 5.0,
+          "N": 20.0,
+          "P": 14.0,
+          "Grand Total": 39.0
+        },
+        {
+          "Row Labels": "24-2",
+          "M": 6.0,
+          "N": 15.0,
+          "P": 19.0,
+          "Grand Total": 40.0
+        },
+        {
+          "Row Labels": "25-1",
+          "M": 7.0,
+          "N": 16.0,
+          "P": 15.0,
+          "Grand Total": 38.0
+        },
+        {
+          "Row Labels": "25-2",
+          "M": 9.0,
+          "N": 14.0,
+          "P": 17.0,
+          "Grand Total": 40.0
+        },
+        {
+          "Row Labels": "26-1",
+          "M": 7.0,
+          "N": 16.0,
+          "P": 18.0,
+          "Grand Total": 41.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "M": 34.0,
+          "N": 81.0,
+          "P": 83.0,
+          "Grand Total": 198.0
+        }
+      ]
+    },
+    "resultNote": "Every cohort has 8 people, so a full week is 48 shifts. The totals are 39, 40, 38, 40 and 41, so 25-1 has the most days off (10) and 26-1 the fewest (7). Leave days off out: filling them with N to make the numbers tidy would invent coverage.",
+    "formula": "Data > From Table/Range > select the day columns > Unpivot Columns\nRows: Gen · Columns: Code · Values: Count of Inisial",
+    "reference": true
+  },
+  "W8D6": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Everything on the tab reads this one source.",
+    "task": "Put a grouped time band, a percent of total and a ranking on one tab, wire them all to one Group slicer, and compare the tab with and without the slicer.",
+    "result": {
+      "columns": [
+        "Pivot",
+        "All groups",
+        "G1 only"
+      ],
+      "rows": [
+        {
+          "Pivot": "Early week workload",
+          "All groups": 36.5,
+          "G1 only": 7.5
+        },
+        {
+          "Pivot": "Late week workload",
+          "All groups": 35.5,
+          "G1 only": 8.5
+        },
+        {
+          "Pivot": "Largest share",
+          "All groups": "AB, 6.9%",
+          "G1 only": "AB, 15.6%"
+        }
+      ]
+    },
+    "resultNote": "Under G1 the early and late bands fall to 7.5 and 8.5. The share pivot re-bases to the filtered total: AB is 6.9% of everything but 15.6% of G1. Nothing on screen says which total that is, so the title has to name the filter.",
+    "formula": "Right-click the slicer > Report Connections > tick every pivot on the tab",
+    "reference": true
+  },
+  "W9D1": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "The group pivot, now drawn.",
+    "task": "Build a PivotChart from the group pivot, attach a Lecturer Type slicer, and set it to Forum.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload"
+      ],
+      "rows": [
+        {
+          "Row Labels": "G1",
+          "Sum of Workload": 3.5
+        },
+        {
+          "Row Labels": "G2",
+          "Sum of Workload": 2.0
+        },
+        {
+          "Row Labels": "G3",
+          "Sum of Workload": 3.0
+        },
+        {
+          "Row Labels": "G4",
+          "Sum of Workload": 3.0
+        },
+        {
+          "Row Labels": "G5",
+          "Sum of Workload": 2.5
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 14.0
+        }
+      ]
+    },
+    "resultNote": "Forum carries 14 of the 72, from 2.0 in G2 to 3.5 in G1. The chart and the pivot redraw in the same refresh, so they cannot disagree. Hide the field buttons once the layout is settled.",
+    "formula": "PivotTable Analyze > PivotChart\nPivotChart Analyze > Field Buttons > Hide All",
+    "reference": true
+  },
+  "W9D2": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "The teaching table. Gen and each day's shift come from the Workshift roster, as a Table named Workshift.",
+    "task": "Bring Gen into the teaching table with XLOOKUP on Ast, with \"unknown\" for a code that is not on the roster. Bring in the shift that assistant works on the session's day too, then pivot workload by Gen and Shift.",
+    "requires": [
+      "XLOOKUP"
+    ],
+    "result": {
+      "columns": [
+        "Row Labels",
+        "M",
+        "N",
+        "P",
+        "off",
+        "Grand Total"
+      ],
+      "rows": [
+        {
+          "Row Labels": "24-1",
+          "M": 5.5,
+          "N": 7.5,
+          "P": 10.5,
+          "off": 6.5,
+          "Grand Total": 30.0
+        },
+        {
+          "Row Labels": "24-2",
+          "M": 6.0,
+          "N": 10.5,
+          "P": 7.5,
+          "off": 3.0,
+          "Grand Total": 27.0
+        },
+        {
+          "Row Labels": "25-1",
+          "M": 3.0,
+          "N": 6.0,
+          "P": 6.0,
+          "off": 0.0,
+          "Grand Total": 15.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "M": 14.5,
+          "N": 24.0,
+          "P": 24.0,
+          "off": 9.5,
+          "Grand Total": 72.0
+        }
+      ]
+    },
+    "resultNote": "Three cohorts teach: 24-1 carries 30, 24-2 carries 27 and 25-1 carries 15. Every code matched, so there is no unknown column here; change one Ast to ZZ to see it appear. The off column is the finding: 9.5 of workload falls on days the roster says those assistants are off.",
+    "formula": "=XLOOKUP([@Ast], Workshift[Inisial], Workshift[Gen], \"unknown\")\n=LET(s, XLOOKUP([@Ast], Workshift[Inisial], XLOOKUP(LEFT([@Day], 3), Workshift[#Headers], Workshift), \"unknown\"),\n     IF(s = \"\", \"off\", s))",
+    "reference": true
+  },
+  "W9D3": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Lecturer Type",
+      "Workload"
+    ],
+    "inputNote": "The joined teaching table, with Gen added in W9D2.",
+    "task": "Assemble a one-screen dashboard from the joined table: KPI cards, three pivots, and slicers on Group, Gen and Lecturer Type, all connected. Then clear every slicer and check the baseline.",
+    "result": {
+      "columns": [
+        "Measure",
+        "All",
+        "Gen 24-2"
+      ],
+      "rows": [
+        {
+          "Measure": "Sessions",
+          "All": 41.0,
+          "Gen 24-2": 16.0
+        },
+        {
+          "Measure": "Workload",
+          "All": 72.0,
+          "Gen 24-2": 27.0
+        },
+        {
+          "Measure": "Assistants",
+          "All": 21.0,
+          "Gen 24-2": 8.0
+        }
+      ]
+    },
+    "resultNote": "Cleared, the dashboard must read 41 sessions, 72 workload and 21 assistants, the same as the single-file figures, since a lookup adds no rows. With Gen set to 24-2 it reads 16, 27 and 8.",
+    "formula": "Slicers: Group, Gen, Lecturer Type · Report Connections: every pivot",
+    "reference": true
+  },
+  "W9D4": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Workload"
+    ],
+    "inputNote": "The teaching table and the roster, both added to the Data Model.",
+    "task": "Add both tables to the Data Model, relate Ast to Inisial, and build the cohort pivot with Gen from the roster and Workload from the teaching table, with no helper columns.",
+    "result": {
+      "columns": [
+        "Row Labels",
+        "Sum of Workload"
+      ],
+      "rows": [
+        {
+          "Row Labels": "24-1",
+          "Sum of Workload": 30.0
+        },
+        {
+          "Row Labels": "24-2",
+          "Sum of Workload": 27.0
+        },
+        {
+          "Row Labels": "25-1",
+          "Sum of Workload": 15.0
+        },
+        {
+          "Row Labels": "Grand Total",
+          "Sum of Workload": 72.0
+        }
+      ]
+    },
+    "resultNote": "The same totals as W9D2: 30, 27 and 15, with nothing copied between tables. If every row repeats 72, the relationship is missing or reversed. Inisial is the one side, 40 unique codes, and Ast the many side.",
+    "formula": "Insert > PivotTable > Add this data to the Data Model, for both tables\nData > Relationships: Teaching[Ast] to Workshift[Inisial]",
+    "reference": true
+  },
+  "W9D5": {
+    "dataset": "teaching",
+    "inputColumns": [
+      "Ast",
+      "Group",
+      "Lecturer Type",
+      "Day",
+      "Workload"
+    ],
+    "inputNote": "Everything the four questions need.",
+    "task": "One tab, four pivots, one per operations question, with slicers on Group and Day connected to all four, laid out to read without scrolling.",
+    "result": {
+      "columns": [
+        "Question",
+        "Answer"
+      ],
+      "rows": [
+        {
+          "Question": "Who is overloaded?",
+          "Answer": "AB and HI, 5.0 each, against a median of 4.0."
+        },
+        {
+          "Question": "Which day is thin?",
+          "Answer": "Saturday at 6.5, then Wednesday at 7.5."
+        },
+        {
+          "Question": "VC against Forum",
+          "Answer": "VC carries 58.0 of 72.0 (80.6%), Forum 14.0."
+        },
+        {
+          "Question": "Load across cohorts",
+          "Answer": "24-1 carries 30.0, 24-2 carries 27.0 and 25-1 carries 15.0."
+        }
+      ]
+    },
+    "resultNote": "The four answers the tab has to make obvious. With every slicer cleared it must read 41 sessions, 72 workload and 21 assistants. A dashboard that cannot return to that baseline will eventually be quoted while filtered.",
+    "formula": "Four PivotTables · Slicers: Group, Day · Report Connections: all four",
+    "reference": true
   }
 }

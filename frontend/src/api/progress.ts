@@ -1,7 +1,7 @@
 /**
  * The one call this app makes.
  *
- * The plan is 110 notes — small enough that fetching all of it at once is
+ * The plan is 127 notes — small enough that fetching all of it at once is
  * cheaper than the round trips paginating it would cost, and it means every
  * screen renders from a single source rather than each assembling its own
  * partial view.
@@ -124,14 +124,30 @@ export interface SheetTableData {
   rows: Array<Record<string, unknown>>;
 }
 
+/** An input cell the answer has to react to, so a hand-typed column stops
+ *  being right the moment the cell changes. */
+export interface Control {
+  cell: string;
+  label: string;
+  value: string;
+  note: string;
+}
+
 export interface Example {
   dataset: string;
   inputColumns: string[];
   inputNote: string;
   task: string;
+  /** The techniques the answer must genuinely use. */
+  requires?: string[];
+  controls?: Control[];
   result: SheetTableData;
   resultNote: string;
   formula: string;
+  /** Shown for study only; the checker cannot compare this answer. */
+  reference?: boolean;
+  /** "data" when the case is done on the Data sheet rather than on Answer. */
+  workOn?: "data";
 }
 
 export interface NoteDetail {
@@ -139,6 +155,9 @@ export interface NoteDetail {
   /** Absent for cases with no worked example written yet — most of them. */
   example?: Example;
   dataset?: SheetTableData & { id: string; name: string; description: string };
+  /** How many cases have a worked example, so the page can state coverage
+   *  rather than assert which phases it thinks are covered. */
+  exampleCount?: number;
 }
 
 export async function fetchNote(slug: string): Promise<NoteDetail> {
@@ -200,6 +219,50 @@ export async function saveWorkbook(
     res = await fetch(url, { method: "POST" });
   } catch {
     throw new ApiError("Can't reach the ExcelPlan server.", true);
+  }
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new ApiError(body?.error ?? `The server answered ${res.status}.`);
+  }
+  return (await res.json()) as SavedWorkbook;
+}
+
+/** Whether the case's workbook is in the vault, and whether it predates the
+ *  Answer sheet. */
+export interface WorkbookStatus {
+  exists: boolean;
+  outdated: boolean;
+  path: string;
+}
+
+export async function fetchWorkbookStatus(slug: string): Promise<WorkbookStatus> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/v1/notes/${encodeURIComponent(slug)}/workbook/status`);
+  } catch {
+    throw new ApiError("Can't reach the ExcelPlan server.", true);
+  }
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new ApiError(body?.error ?? `The server answered ${res.status}.`);
+  }
+  return (await res.json()) as WorkbookStatus;
+}
+
+/**
+ * Replace an old-template workbook: the server moves it to the Recycle Bin and
+ * writes a fresh one in its place. Only called after the user confirms.
+ */
+export async function replaceWorkbook(slug: string): Promise<SavedWorkbook> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/v1/notes/${encodeURIComponent(slug)}/workbook/replace`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirm: true }),
+    });
+  } catch {
+    throw new ApiError("Can't reach the ExcelPlan server. Nothing was replaced.", true);
   }
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { error?: string } | null;

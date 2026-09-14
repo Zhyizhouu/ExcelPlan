@@ -2,7 +2,7 @@
 // its own: when.
 //
 // A day note's checkbox is a bare boolean — checked or not — with no record of
-// which date it was ticked on. That is enough to render "62 of 110 done," but
+// which date it was ticked on. That is enough to render "62 of 127 done," but
 // not "did you show up today," which a streak needs. Rather than write a
 // timestamp into the vault's own files — a second thing to keep in sync with
 // Obsidian, and a file format this app does not own — completion dates live
