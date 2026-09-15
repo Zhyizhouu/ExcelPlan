@@ -246,7 +246,7 @@ function CaseBody({ slug, detail }: { slug: string; detail: NoteDetail }) {
                 <ExportBar
                   slug={slug}
                   checkerNeedsAnswerSheet={
-                    note.Week !== 1 && !example.reference && example.workOn !== "data"
+                    !example.practice && !example.reference && example.workOn !== "data"
                   }
                 />
               </div>
@@ -259,8 +259,8 @@ function CaseBody({ slug, detail }: { slug: string; detail: NoteDetail }) {
             <SheetTable data={example.result} caption="What your sheet should show" />
           </section>
 
-          {/* Week 1 is practice, and reference examples cannot be compared. */}
-          {note.Week !== 1 && !example.reference && (
+          {/* Practice and reference examples are not checked. */}
+          {!example.practice && !example.reference && (
             <JudgePanel slug={slug} workOnData={example.workOn === "data"} />
           )}
 

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"cmp"
 	"fmt"
+	"maps"
 	"math"
 	"regexp"
 	"slices"
@@ -74,7 +75,8 @@ type judging struct {
 
 func (j *judging) run() {
 	sheet := workbook.SheetAnswer
-	if j.ex.WorkOn == "data" {
+	// A Data-sheet case may be done on a copy on Answer instead; use it when it is there.
+	if j.ex.WorkOn == "data" && !j.hasHeaders(workbook.SheetAnswer) {
 		sheet = workbook.SheetData
 	}
 	if idx, err := j.f.GetSheetIndex(sheet); err != nil || idx < 0 {
@@ -150,7 +152,27 @@ type block struct {
 	header int            // header row number
 	col    map[string]int // expected column name to column number
 	rows   []int          // visible data rows, top to bottom
+	all    []int          // every data row, hidden ones included
 	grid   [][]string
+}
+
+// hasHeaders reports whether some row on sheet holds every expected header.
+func (j *judging) hasHeaders(sheet string) bool {
+	cols := j.ex.Result.Columns
+	grid, err := j.f.GetRows(sheet, excelize.Options{RawCellValue: true})
+	if err != nil || len(cols) == 0 {
+		return false
+	}
+	for _, row := range grid {
+		have := map[string]bool{}
+		for _, v := range row {
+			have[normHeader(v)] = true
+		}
+		if !slices.ContainsFunc(cols, func(c string) bool { return !have[normHeader(c)] }) {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *block) value(row int, column string) string {
@@ -196,37 +218,34 @@ func (j *judging) findBlock(sheet string) *block {
 	var twice []int
 	bestRow, bestHave := 0, []string(nil)
 	for i, row := range grid {
-		at, count := map[string]int{}, map[string]int{}
+		at := map[string][]int{}
 		for c, v := range row {
-			k := normHeader(v)
-			if k == "" {
-				continue
-			}
-			count[k]++
-			if _, seen := at[k]; !seen {
-				at[k] = c + 1
+			if k := normHeader(v); k != "" {
+				at[k] = append(at[k], c+1)
 			}
 		}
 
-		b := &block{sheet: sheet, header: i + 1, col: map[string]int{}, grid: grid}
 		var have []string
-		repeated := false
 		for _, name := range cols {
-			if c, ok := at[normHeader(name)]; ok {
-				b.col[name] = c
+			if len(at[normHeader(name)]) > 0 {
 				have = append(have, name)
-				repeated = repeated || count[normHeader(name)] > 1
 			}
 		}
-		switch {
-		case len(have) == len(cols) && repeated:
-			twice = append(twice, i+1)
-		case len(have) == len(cols):
-			b.rows = j.dataRows(b)
-			found = append(found, b)
-		case len(have) > len(bestHave):
-			bestRow, bestHave = i+1, have
+		if len(have) < len(cols) {
+			if len(have) > len(bestHave) {
+				bestRow, bestHave = i+1, have
+			}
+			continue
 		}
+		// Every header twice means two whole tables side by side. One header
+		// twice is usually a summary sharing a row with its source table.
+		if !slices.ContainsFunc(cols, func(c string) bool { return len(at[normHeader(c)]) < 2 }) {
+			twice = append(twice, i+1)
+			continue
+		}
+		b := &block{sheet: sheet, header: i + 1, col: closestHeaders(cols, at), grid: grid}
+		b.rows, b.all = j.dataRows(b)
+		found = append(found, b)
 	}
 
 	switch {
@@ -263,11 +282,39 @@ func (j *judging) findBlock(sheet string) *block {
 	return found[0]
 }
 
+// closestHeaders picks one column per header, taking the tightest span when a
+// header repeats in the row, since a table's own columns sit together.
+func closestHeaders(cols []string, at map[string][]int) map[string]int {
+	var best map[string]int
+	bestSpan := math.MaxInt
+	pick := make(map[string]int, len(cols))
+	var walk func(i, lo, hi int)
+	walk = func(i, lo, hi int) {
+		if i > 0 && hi-lo >= bestSpan {
+			return
+		}
+		if i == len(cols) {
+			best, bestSpan = maps.Clone(pick), hi-lo
+			return
+		}
+		for _, c := range at[normHeader(cols[i])] {
+			pick[cols[i]] = c
+			if i == 0 {
+				walk(1, c, c)
+			} else {
+				walk(i+1, min(lo, c), max(hi, c))
+			}
+		}
+	}
+	walk(0, 0, 0)
+	return best
+}
+
 // dataRows reads down from the header to the first row where every expected
-// column is blank. Rows hidden by a filter are skipped, since the filter is
-// often the answer.
-func (j *judging) dataRows(b *block) []int {
-	var rows []int
+// column is blank. Rows hidden by a filter are left out of visible, since the
+// filter is often the answer, but kept in all: a sort applies to the whole
+// table, so the order check has to see them.
+func (j *judging) dataRows(b *block) (visible, all []int) {
 	for r := b.header + 1; r <= len(b.grid); r++ {
 		blank := true
 		for name := range b.col {
@@ -279,12 +326,13 @@ func (j *judging) dataRows(b *block) []int {
 		if blank {
 			break
 		}
-		if visible, err := j.f.GetRowVisible(b.sheet, r); err == nil && !visible {
+		all = append(all, r)
+		if shown, err := j.f.GetRowVisible(b.sheet, r); err == nil && !shown {
 			continue
 		}
-		rows = append(rows, r)
+		visible = append(visible, r)
 	}
-	return rows
+	return visible, all
 }
 
 // --- values ---------------------------------------------------------------
@@ -513,10 +561,13 @@ func (j *judging) checkOrder(b *block) {
 	switch {
 	case len(ex.SortedBy) > 0:
 		check := Check{ID: "order", Label: "Sorted by " + describeSort(ex), Status: Pass}
-		for i := 1; i < len(b.rows); i++ {
-			if compareCells(b, b.rows[i-1], b.rows[i], ex.SortedBy) > 0 {
+		for i := 1; i < len(b.all); i++ {
+			if compareCells(b, b.all[i-1], b.all[i], ex.SortedBy) > 0 {
 				check.Status = Fail
-				check.Detail = fmt.Sprintf("Rows %d and %d are out of order.", b.rows[i-1], b.rows[i])
+				check.Detail = fmt.Sprintf("Rows %d and %d are out of order.", b.all[i-1], b.all[i])
+				if len(b.all) > len(b.rows) {
+					check.Detail += " Rows hidden by the filter count too: sort the whole table, then filter."
+				}
 				break
 			}
 		}

@@ -27,14 +27,15 @@ func (s *Server) handleJudge(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
-	if note.Week == 1 {
-		writeError(w, http.StatusUnprocessableEntity, "Week 1 is practice and is not checked.")
-		return
-	}
 	example, ok := datasets.ExampleFor(note.Slug)
 	if !ok {
 		writeError(w, http.StatusNotFound,
 			"This case has no worked example yet, so there is nothing to check against.")
+		return
+	}
+	if example.Practice {
+		writeError(w, http.StatusUnprocessableEntity,
+			"This is a Week 1 practice case, so it is not checked.")
 		return
 	}
 	if example.Reference {

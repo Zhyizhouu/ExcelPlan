@@ -189,7 +189,8 @@ func w4d6(t Table) computed {
 // W1D6: the assistant card for three codes, the last not on the roster.
 func w1d6(t Table) computed {
 	const light, standard = 3.0, 4.5
-	cols := []string{"Code", "Sessions", "Total Workload", "First course", "Band", "x1.25", "x1.5", "x2"}
+	// The multipliers are the headers themselves, so one mixed reference reads them.
+	cols := []string{"Code", "Sessions", "Total Workload", "First course", "Band", "1.25", "1.5", "2"}
 	var rows []map[string]any
 	for _, code := range []string{"AB", "CD", "ZZ"} {
 		sessions, total := 0.0, 0.0
@@ -216,7 +217,7 @@ func w1d6(t Table) computed {
 		}
 		rows = append(rows, map[string]any{
 			"Code": code, "Sessions": sessions, "Total Workload": total, "First course": first,
-			"Band": band, "x1.25": total * 1.25, "x1.5": total * 1.5, "x2": total * 2,
+			"Band": band, "1.25": total * 1.25, "1.5": total * 1.5, "2": total * 2,
 		})
 	}
 	return computed{cols, rows}

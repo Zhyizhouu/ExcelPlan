@@ -146,6 +146,8 @@ export interface Example {
   formula: string;
   /** Shown for study only; the checker cannot compare this answer. */
   reference?: boolean;
+  /** A Week 1 warm-up the checker skips. */
+  practice?: boolean;
   /** "data" when the case is done on the Data sheet rather than on Answer. */
   workOn?: "data";
 }

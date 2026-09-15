@@ -162,7 +162,8 @@
       ]
     },
     "resultNote": "Identical to the source — the exercise is the keyboard, not the answer.",
-    "formula": "Ctrl+→  Ctrl+Shift+↓  F2  Ctrl+;  F4"
+    "formula": "Ctrl+→  Ctrl+Shift+↓  F2  Ctrl+;  F4",
+    "practice": true
   },
   "W1D2": {
     "dataset": "teaching",
@@ -226,7 +227,8 @@
       ]
     },
     "resultNote": "The $ signs do the work: $A2 locks the column, B$1 locks the row.",
-    "formula": "=$A2 * B$1"
+    "formula": "=$A2 * B$1",
+    "practice": true
   },
   "W1D3": {
     "dataset": "teaching",
@@ -337,7 +339,8 @@
         "value": "2.5",
         "note": "The second cutoff. Both belong in cells, not buried in the formula."
       }
-    ]
+    ],
+    "practice": true
   },
   "W1D4": {
     "dataset": "teaching",
@@ -407,7 +410,8 @@
         "value": "VC",
         "note": "Switch this to Forum and the fourth column must follow without editing a formula."
       }
-    ]
+    ],
+    "practice": true
   },
   "W1D5": {
     "dataset": "teaching",
@@ -468,7 +472,8 @@
         "value": "HI",
         "note": "Change this and the lookup beside it must follow on its own. Try ZZ, which is not on the roster — that is what XLOOKUP's if_not_found argument is for."
       }
-    ]
+    ],
+    "practice": true
   },
   "W1D6": {
     "dataset": "teaching",
@@ -478,7 +483,7 @@
       "Workload"
     ],
     "inputNote": "Every session with its assistant, course and workload.",
-    "task": "Build one card that answers everything about an assistant from a code typed into a single cell: sessions with COUNTIFS, total workload with SUMIFS, their first course with XLOOKUP, a band with IFS, and a strip of workload at 1.25x, 1.5x and 2x from one mixed-reference formula. Put a roster list beside it with SORT and UNIQUE, so the code has something to be checked against.",
+    "task": "Build a card that answers everything about an assistant: sessions with COUNTIFS, total workload with SUMIFS, their first course with XLOOKUP, a band with IFS, and a strip of workload at 1.25x, 1.5x and 2x from one mixed-reference formula. Put a roster list beside it with SORT and UNIQUE. To get it checked, lay the card out as a table on the Answer sheet: one row per code down the first column (any assistants you like, but AB, CD and ZZ must be there), the numbers 1.25, 1.5 and 2 as the last three headers, and every row running the same formulas.",
     "requires": [
       "SORT",
       "UNIQUE",
@@ -502,9 +507,9 @@
         "Total Workload",
         "First course",
         "Band",
-        "x1.25",
-        "x1.5",
-        "x2"
+        "1.25",
+        "1.5",
+        "2"
       ],
       "rows": [
         {
@@ -513,9 +518,9 @@
           "Total Workload": 5.0,
           "First course": "Algorithm and Programming",
           "Band": "heavy",
-          "x1.25": 6.25,
-          "x1.5": 7.5,
-          "x2": 10.0
+          "1.25": 6.25,
+          "1.5": 7.5,
+          "2": 10.0
         },
         {
           "Code": "CD",
@@ -523,9 +528,9 @@
           "Total Workload": 2.0,
           "First course": "Database Systems",
           "Band": "light",
-          "x1.25": 2.5,
-          "x1.5": 3.0,
-          "x2": 4.0
+          "1.25": 2.5,
+          "1.5": 3.0,
+          "2": 4.0
         },
         {
           "Code": "ZZ",
@@ -533,14 +538,24 @@
           "Total Workload": 0.0,
           "First course": "not on roster",
           "Band": "not on roster",
-          "x1.25": 0.0,
-          "x1.5": 0.0,
-          "x2": 0.0
+          "1.25": 0.0,
+          "1.5": 0.0,
+          "2": 0.0
         }
       ]
     },
-    "resultNote": "The card for three codes. AB teaches 2 sessions, 5.0 in total, and is heavy (light is under 3, standard under 4.5). CD is light at 2.0. ZZ is not on the roster, and the card says so instead of showing #N/A, which is the stretch.",
-    "formula": "=SORT(UNIQUE(Data!A2:A42))\n=COUNTIFS(Data!$A$2:$A$42, Data!$G$1)\n=SUMIFS(Data!$C$2:$C$42, Data!$A$2:$A$42, Data!$G$1)\n=XLOOKUP(Data!$G$1, Data!$A$2:$A$42, Data!$B$2:$B$42, \"not on roster\")\n=IF(B2=0, \"not on roster\", IFS(C2<3, \"light\", C2<4.5, \"standard\", TRUE, \"heavy\"))\n=$C2*F$1"
+    "resultNote": "Three rows the checker requires; a row for every other assistant is fine too. AB teaches 2 sessions, 5.0 in total, and is heavy (light is under 3, standard under 4.5). CD is light at 2.0. ZZ is not on the roster, and its row says so instead of showing #N/A, which is the stretch.",
+    "formula": "=SORT(UNIQUE(Data!A2:A42))\n=COUNTIFS(Data!$A$2:$A$42, $A2)\n=SUMIFS(Data!$C$2:$C$42, Data!$A$2:$A$42, $A2)\n=XLOOKUP($A2, Data!$A$2:$A$42, Data!$B$2:$B$42, \"not on roster\")\n=IF(B2=0, \"not on roster\", IFS(C2<3, \"light\", C2<4.5, \"standard\", TRUE, \"heavy\"))\n=$C2*F$1",
+    "computed": [
+      "Sessions",
+      "Total Workload",
+      "First course",
+      "Band",
+      "1.25",
+      "1.5",
+      "2"
+    ],
+    "sample": true
   },
   "W2D1": {
     "dataset": "teaching",
@@ -580,7 +595,8 @@
     ],
     "checks": [
       "table"
-    ]
+    ],
+    "workOn": "data"
   },
   "W2D2": {
     "dataset": "teaching",

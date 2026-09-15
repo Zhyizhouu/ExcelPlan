@@ -83,12 +83,14 @@ type Example struct {
 	// Reference marks an example shown for study only: its answer is a pivot,
 	// a chart or a written judgement the checker cannot compare.
 	Reference bool `json:"reference,omitempty"`
+	// Practice marks a warm-up case the user chose not to have checked.
+	Practice bool `json:"practice,omitempty"`
 }
 
 // Judged reports whether the answer is a table of values the judge compares,
 // as opposed to rules it inspects.
 func (e Example) Judged() bool {
-	if e.Reference {
+	if e.Reference || e.Practice {
 		return false
 	}
 	for _, c := range e.Checks {

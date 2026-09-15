@@ -39,7 +39,7 @@ export function JudgePanel({ slug, workOnData = false }: { slug: string; workOnD
       <h2 className="mb-1 text-lg font-semibold text-ink">Check your answer</h2>
       <p className="mb-3 text-sm text-ink-muted">
         {workOnData
-          ? "Do the work on the Data sheet itself"
+          ? "Do the work on the Data sheet, or on a copy of the data on the Answer sheet"
           : "Build your table on the Answer sheet with the same headers as the expected result"}
         , save in Excel (Ctrl+S), then check. The checker reads the saved file.
       </p>

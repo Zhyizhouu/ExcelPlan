@@ -88,11 +88,12 @@ func main() {
 	}()
 
 	err = wails.Run(&options.App{
-		Title:            "ExcelPlan",
-		Width:            1280,
-		Height:           800,
-		MinWidth:         900,
-		MinHeight:        600,
+		Title:  "ExcelPlan",
+		Width:  1280,
+		Height: 800,
+		// Low enough to snap beside Excel on half of a 1536px-wide screen.
+		MinWidth:         480,
+		MinHeight:        400,
 		Assets:           assets(),
 		BackgroundColour: &options.RGBA{R: 15, G: 15, B: 15, A: 1},
 		OnStartup:        func(ctx context.Context) {},

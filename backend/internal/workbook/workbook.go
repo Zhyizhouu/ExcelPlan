@@ -185,7 +185,8 @@ func HasAnswerSheet(data []byte) (bool, error) {
 func workOn(example datasets.Example) string {
 	switch {
 	case example.WorkOn == "data":
-		return "The Data sheet itself. The checker reads your work there."
+		return "The Data sheet itself, or a copy of the data on the Answer sheet. " +
+			"The checker uses Answer when it finds the headers there."
 	case !example.Judged():
 		return "The Answer sheet. This case's example is a reference, so compare " +
 			"your work with the Expected sheet yourself."

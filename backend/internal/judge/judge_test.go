@@ -3,6 +3,7 @@ package judge
 import (
 	"archive/zip"
 	"bytes"
+	"slices"
 	"strings"
 	"testing"
 
@@ -155,6 +156,48 @@ func TestTwoTablesAreAmbiguous(t *testing.T) {
 	}
 }
 
+func lecturerTypeTotals() datasets.Example {
+	return datasets.Example{
+		Result: datasets.Result{
+			Columns: []string{"Lecturer Type", "Total Workload"},
+			Rows: []map[string]any{
+				{"Lecturer Type": "VC", "Total Workload": 58.0},
+				{"Lecturer Type": "Forum", "Total Workload": 14.0},
+			},
+		},
+	}
+}
+
+// A summary beside its source table shares a header row with it, so
+// "Lecturer Type" appears twice. That is one answer, not two.
+func TestSummaryBesideItsSourceTable(t *testing.T) {
+	data := book(t, func(f *excelize.File) {
+		s := workbook.SheetAnswer
+		must(t, f.SetSheetRow(s, "A1", &[]any{"Lecturer Type", "Workload", nil, "Lecturer Type", "Total Workload"}))
+		must(t, f.SetSheetRow(s, "A2", &[]any{"VC", 2.5, nil, "VC", 58}))
+		must(t, f.SetSheetRow(s, "A3", &[]any{"Forum", 1, nil, "Forum", 14}))
+		must(t, f.SetSheetRow(s, "A4", &[]any{"VC", 2}))
+	})
+	r := run(t, data, lecturerTypeTotals())
+	if c := find(r, "found"); c.Status != Pass || !mentions(c, "Answer!D1:E3") {
+		t.Fatalf("found = %+v", c)
+	}
+	if !r.Passed {
+		t.Fatalf("want a pass, got %+v", r.Checks)
+	}
+}
+
+func TestTwoWholeTablesInOneRowAreAmbiguous(t *testing.T) {
+	data := book(t, func(f *excelize.File) {
+		s := workbook.SheetAnswer
+		must(t, f.SetSheetRow(s, "A1", &[]any{"Lecturer Type", "Total Workload", nil, "Lecturer Type", "Total Workload"}))
+		must(t, f.SetSheetRow(s, "A2", &[]any{"VC", 58, nil, "VC", 58}))
+	})
+	if c := find(run(t, data, lecturerTypeTotals()), "found"); c.Status != Fail || !mentions(c, "headers twice") {
+		t.Fatalf("found = %+v", c)
+	}
+}
+
 func TestSumifsDoesNotCountAsSumif(t *testing.T) {
 	data := book(t, func(f *excelize.File) { answer(t, f, "A1", good, "SUMIFS") })
 	c := find(run(t, data, summary()), "techniques")
@@ -204,6 +247,69 @@ func TestHiddenRowsAreSkipped(t *testing.T) {
 	})
 	if c := find(run(t, data, summary()), "values"); c.Status != Pass {
 		t.Fatalf("a filtered-out row should not count: %+v", c)
+	}
+}
+
+func sortFilterCase() datasets.Example {
+	return datasets.Example{
+		WorkOn:   "data",
+		SortedBy: []string{"Group", "-Workload"},
+		Result: datasets.Result{
+			Columns: []string{"Group", "Ast", "Workload"},
+			Rows: []map[string]any{
+				{"Group": "G3", "Ast": "MN", "Workload": 2.0},
+				{"Group": "G3", "Ast": "BC", "Workload": 2.0},
+			},
+		},
+	}
+}
+
+// filtered writes rows under a header and hides every row not in keep.
+func filtered(t *testing.T, f *excelize.File, sheet string, rows [][]any, keep ...int) {
+	t.Helper()
+	must(t, f.SetSheetRow(sheet, "A1", &[]any{"Group", "Ast", "Workload"}))
+	for i, r := range rows {
+		cell, _ := excelize.CoordinatesToCellName(1, i+2)
+		must(t, f.SetSheetRow(sheet, cell, &r))
+		if !slices.Contains(keep, i+2) {
+			must(t, f.SetRowVisible(sheet, i+2, false))
+		}
+	}
+}
+
+var (
+	sortedRows   = [][]any{{"G1", "AB", 2.5}, {"G2", "CD", 1}, {"G3", "MN", 2}, {"G3", "BC", 2}}
+	unsortedRows = [][]any{{"G1", "AB", 2.5}, {"G3", "MN", 2}, {"G2", "CD", 1}, {"G3", "BC", 2}}
+)
+
+// A Data-sheet case done on a copy on Answer is judged there, not against the
+// untouched original on Data.
+func TestDataCaseDoneOnTheAnswerSheet(t *testing.T) {
+	data := book(t, func(f *excelize.File) {
+		filtered(t, f, workbook.SheetData, unsortedRows) // the original, all visible
+		filtered(t, f, workbook.SheetAnswer, sortedRows, 4, 5)
+	})
+	r := run(t, data, sortFilterCase())
+	if c := find(r, "found"); !mentions(c, "Answer!") {
+		t.Fatalf("found = %+v", c)
+	}
+	if !r.Passed {
+		t.Fatalf("want a pass, got %+v", r.Checks)
+	}
+}
+
+// Filtering without sorting leaves the right rows visible, so only the hidden
+// rows show the sort was skipped.
+func TestSortCountsRowsHiddenByTheFilter(t *testing.T) {
+	data := book(t, func(f *excelize.File) {
+		filtered(t, f, workbook.SheetData, unsortedRows, 3, 5)
+	})
+	r := run(t, data, sortFilterCase())
+	if c := find(r, "values"); c.Status != Pass {
+		t.Fatalf("the visible rows are right: %+v", c)
+	}
+	if c := find(r, "order"); c.Status != Fail || !mentions(c, "sort the whole table") {
+		t.Fatalf("order = %+v", c)
 	}
 }
 

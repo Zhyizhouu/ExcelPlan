@@ -224,7 +224,7 @@ opens it:
 - **Expected** — the answer, on its own sheet so opening the file does not give
   it away
 
-**Check my answer** (Week 2 onwards) reads the saved workbook and compares your
+**Check my answer** (Week 2 onwards, plus the W1D6 weekly build) reads the saved workbook and compares your
 table with the expected result: the values, the row order where it matters,
 whether the required functions appear, and whether answers are formulas rather
 than typed values. It is plain comparison, not AI, so the same file always gets
